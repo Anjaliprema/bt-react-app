@@ -35,7 +35,7 @@ body {
 }
 
 .header.scrolled {
-  width: min(92%, 1100px);
+  width: min(67%, 1100px);
   margin: 20px auto 0 auto;
   left: 50%;
   transform: translateX(-50%);
