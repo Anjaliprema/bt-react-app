@@ -1,0 +1,555 @@
+:root {
+  --ts-accent: #053859; /* softer golden for light */
+  --ts-accent-soft: rgba(0, 39, 212, 0.18);
+  --ts-grid: rgba(5, 56, 89, 0.15);
+  --ts-grid-soft: rgba(5, 56, 89, 0.08);
+  --ts-text-soft: rgba(5, 56, 89, 0.6);
+}
+
+.ts-dark {
+  --ts-accent: #f7c651; /* strong gold for dark */
+  --ts-accent-soft: rgba(247, 198, 81, 0.15);
+  --ts-grid: rgba(255, 255, 255, 0.12);
+  --ts-grid-soft: rgba(255, 255, 255, 0.07);
+  --ts-text-soft: rgba(255, 255, 255, 0.6);
+}
+
+* {
+  font-family:
+    "Poppins",
+    "Segoe UI",
+    system-ui,
+    -apple-system,
+    sans-serif;
+}
+.tsection {
+  padding: 100px 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+.ts-dark {
+  background: transparent;
+}
+
+.ts-light {
+  background: rgba(5, 56, 89, 0.02);
+}
+
+.ts-dark::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      ellipse 55% 60% at 15% 50%,
+      rgba(247, 198, 81, 0.055),
+      transparent
+    ),
+    radial-gradient(
+      ellipse 55% 60% at 85% 50%,
+      rgba(97, 218, 251, 0.04),
+      transparent
+    );
+  pointer-events: none;
+}
+
+.ts-light::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      ellipse 55% 60% at 15% 50%,
+      rgba(5, 56, 89, 0.04),
+      transparent
+    ),
+    radial-gradient(
+      ellipse 55% 60% at 85% 50%,
+      rgba(5, 56, 89, 0.03),
+      transparent
+    );
+  pointer-events: none;
+}
+
+.ts-header {
+  text-align: center;
+  margin-bottom: 56px;
+}
+
+.ts-eyebrow {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 12px 22px;
+  border-radius: 30px;
+  margin-bottom: 16px;
+}
+
+.ts-dark .ts-eyebrow {
+  color: #f7c651;
+  background: rgba(247, 198, 81, 0.1);
+  border: 1px solid rgba(247, 198, 81, 0.22);
+}
+
+.ts-light .ts-eyebrow {
+  color: #053859;
+  background: rgba(5, 56, 89, 0.07);
+  border: 1px solid rgba(5, 56, 89, 0.18);
+}
+
+.ts-title {
+  font-size: 32px;
+  font-weight: 800;
+  margin: 0 0 12px;
+  line-height: 1.25;
+}
+
+.ts-dark .ts-title {
+  color: rgba(255, 255, 255, 0.9);
+}
+.ts-light .ts-title {
+  color: #053859;
+}
+
+.ts-sub {
+  font-size: 15px;
+  opacity: 0.55;
+  margin: 0;
+}
+
+.ts-body {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+}
+
+.ts-panel {
+  border-radius: 24px;
+  padding: 28px 26px;
+  position: relative;
+  height: 100%;
+  max-width: 1160px;
+  margin: 0 auto;
+}
+
+.ts-dark .ts-panel {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+}
+
+.ts-light .ts-panel {
+  background: #ffffff;
+  border: 1px solid rgba(5, 56, 89, 0.1);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.07);
+}
+
+.ts-panel-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin: 0 0 18px;
+}
+
+.ts-dark .ts-panel-title {
+  color: rgba(255, 255, 255, 0.4);
+}
+.ts-light .ts-panel-title {
+  color: rgba(5, 56, 89, 0.45);
+}
+
+.ts-legend {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  margin-bottom: 20px;
+  opacity: 0.7;
+}
+
+.ts-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.ts-legend-before {
+  background: rgba(150, 150, 150, 0.5);
+}
+.ts-legend-after {
+  background: var(--ts-accent);
+}
+
+.ts-skill-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.ts-skill-row {
+}
+
+.ts-skill-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.ts-skill-name {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.ts-dark .ts-skill-name {
+  color: rgba(255, 255, 255, 0.8);
+}
+.ts-light .ts-skill-name {
+  color: #053859;
+}
+
+.ts-skill-val {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.ts-bar-track {
+  position: relative;
+  height: 8px;
+  border-radius: 8px;
+  overflow: visible;
+}
+
+.ts-dark .ts-bar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+.ts-light .ts-bar-track {
+  background: rgba(5, 56, 89, 0.07);
+}
+
+.ts-bar-ghost {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  border-radius: 8px;
+  background: rgba(150, 150, 150, 0.25);
+  z-index: 1;
+  transition: width 1.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ts-bar-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  border-radius: 8px;
+  z-index: 2;
+  transition: width 1.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ts-bar-marker {
+  position: absolute;
+  top: -5px;
+  width: 5px;
+  height: 18px;
+  background: rgba(167, 166, 166, 0.71);
+  border-radius: 2px;
+  z-index: 3;
+  transform: translateX(-1px);
+}
+
+.ts-radar {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.ts-radar-wrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.ts-bars,
+.ts-radar,
+.ts-stats {
+  width: 100%;
+}
+
+.days {
+  display: flex;
+  justify-content: center;
+  padding: 20px 0;
+}
+
+
+.ts-radar {
+  max-width: 450px;
+  justify-self: center;
+}
+.ts-radar-legend {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  margin-top: 10px;
+  opacity: 0.65;
+}
+
+.ts-r-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.ts-r-before {
+  background: rgba(150, 150, 150, 0.5);
+}
+.ts-r-after {
+  background: var(--ts-accent);
+  border: 1px solid var(--ts-accent);
+;
+}
+
+
+.ts-stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+  margin-bottom: 20px;
+}
+
+.ts-stat-card {
+  border-radius: 16px;
+  padding: 16px 14px 12px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.ts-stat-card:hover {
+  transform: translateY(-4px);
+}
+
+.ts-dark .ts-stat-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.ts-light .ts-stat-card {
+  background: rgba(5, 56, 89, 0.04);
+  border: 1px solid rgba(5, 56, 89, 0.1);
+}
+
+.ts-spark {
+  width: 100%;
+  height: 24px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.ts-arc {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  transform: rotate(-90deg);
+}
+
+.ts-stat-values {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 4px;
+}
+
+.ts-stat-before {
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0.35;
+  text-decoration: line-through;
+}
+
+.ts-stat-arrow {
+  font-size: 12px;
+  opacity: 0.4;
+}
+
+.ts-stat-after {
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.ts-dark .ts-stat-after {
+  color: #f7c651;
+}
+.ts-light .ts-stat-after {
+  color: #053859;
+}
+
+.ts-stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  margin: 0;
+  opacity: 0.55;
+  line-height: 1.3;
+}
+
+.ts-tech-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 13px;
+}
+
+.ts-tech-pill {
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 15px;
+  border-radius: 20px;
+  color: var(--tc);
+  background: color-mix(in srgb, var(--tc) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tc) 30%, transparent);
+  cursor: default;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.ts-tech-pill:hover {
+  transform: translateY(-2px) scale(1.08);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--tc) 40%, transparent);
+}
+
+@media (max-width: 960px) {
+  .ts-body {
+    grid-template-columns: 1fr;
+  }
+  .ts-radar {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .tsection {
+    padding: 60px 20px;
+  }
+  .ts-stat-grid {
+    grid-template-columns: 1fr;
+  }
+  .ts-title {
+    font-size: 24px;
+  }
+}
+
+
+@media (max-width: 1024px) {
+
+  .ts-body {
+    gap: 40px;
+  }
+
+  .ts-panel {
+    padding: 24px 22px;
+  }
+
+  .ts-title {
+    font-size: 28px;
+  }
+
+  .ts-radar {
+    max-width: 380px;
+  }
+
+}
+
+@media (max-width: 768px) {
+
+  .tsection {
+    padding: 80px 25px;
+  }
+
+  .ts-body {
+    grid-template-columns: 1fr;
+    gap: 50px;
+  }
+
+  .ts-header {
+    margin-bottom: 40px;
+  }
+
+  .ts-title {
+    font-size: 26px;
+  }
+
+  .ts-sub {
+    font-size: 14px;
+  }
+
+  .ts-stat-grid {
+    gap: 18px;
+  }
+
+}
+
+@media (max-width: 480px) {
+
+  .tsection {
+    padding: 60px 18px;
+  }
+
+  .ts-title {
+    font-size: 22px;
+  }
+
+  .ts-panel {
+    padding: 20px 16px;
+    border-radius: 18px;
+  }
+
+  .ts-panel-title {
+    font-size: 12px;
+  }
+
+  .ts-skill-name {
+    font-size: 12px;
+  }
+
+  .ts-skill-val {
+    font-size: 11px;
+  }
+
+  .ts-stat-after {
+    font-size: 18px;
+  }
+
+  .ts-radar-legend,
+  .ts-legend {
+    font-size: 11px;
+  }
+
+  .ts-tech-pill {
+    font-size: 11px;
+    padding: 6px 12px;
+  }
+
+}
+
+
+@media (max-width: 480px) {
+  .ts-radar-wrap svg {
+    width: 100%;
+    height: auto;
+  }
+}
+
