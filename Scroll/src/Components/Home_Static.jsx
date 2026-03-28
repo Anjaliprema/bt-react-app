@@ -63,7 +63,7 @@ function Home() {
       link: "https://kongu.ac.in/",
     },
     {
-      name: "Sri Eswar College Of Engineering, Coimbatore",
+      name: "Sri Eswar College of Engineering, Coimbatore",
       program: "Mern stack training",
       image: clgimg3,
       logo: logo3,
