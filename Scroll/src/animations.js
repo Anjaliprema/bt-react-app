@@ -4,8 +4,8 @@ export function initCountUp() {
   
   const animateCount = (element) => {
     const target = parseInt(element.getAttribute('data-target'));
-    const duration = 2000; // 2 seconds
-    const increment = target / (duration / 16); // 60fps
+    const duration = 2000;
+    const increment = target / (duration / 16); 
     let current = 0;
     
     const updateCount = () => {

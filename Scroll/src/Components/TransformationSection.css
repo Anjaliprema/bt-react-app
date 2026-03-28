@@ -1,5 +1,5 @@
 :root {
-  --ts-accent: #053859; /* softer golden for light */
+  --ts-accent: #053859;
   --ts-accent-soft: rgba(0, 39, 212, 0.18);
   --ts-grid: rgba(5, 56, 89, 0.15);
   --ts-grid-soft: rgba(5, 56, 89, 0.08);
@@ -7,7 +7,7 @@
 }
 
 .ts-dark {
-  --ts-accent: #f7c651; /* strong gold for dark */
+  --ts-accent: #f7c651;
   --ts-accent-soft: rgba(247, 198, 81, 0.15);
   --ts-grid: rgba(255, 255, 255, 0.12);
   --ts-grid-soft: rgba(255, 255, 255, 0.07);
@@ -23,7 +23,7 @@
     sans-serif;
 }
 .tsection {
-  padding: 100px 40px;
+  padding: 50px 40px;
   position: relative;
   overflow: hidden;
 }
@@ -74,7 +74,7 @@
 
 .ts-header {
   text-align: center;
-  margin-bottom: 56px;
+  margin-bottom: 26px;
 }
 
 .ts-eyebrow {
@@ -85,7 +85,6 @@
   text-transform: uppercase;
   padding: 12px 22px;
   border-radius: 30px;
-  margin-bottom: 16px;
 }
 
 .ts-dark .ts-eyebrow {
@@ -104,6 +103,7 @@
   font-size: 32px;
   font-weight: 800;
   margin: 0 0 12px;
+  padding-top: 15px;
   line-height: 1.25;
 }
 
@@ -116,6 +116,7 @@
 
 .ts-sub {
   font-size: 15px;
+  padding-top: 5px;
   opacity: 0.55;
   margin: 0;
 }
@@ -170,7 +171,7 @@
   gap: 10px;
   font-size: 12px;
   margin-bottom: 20px;
-  opacity: 0.7;
+  opacity: 1;
 }
 
 .ts-legend-dot {
@@ -290,8 +291,9 @@
   justify-content: center;
   padding: 20px 0;
 }
-
-
+.day span {
+  color: var(--ts-accent);
+}
 .ts-radar {
   max-width: 450px;
   justify-self: center;
@@ -302,7 +304,7 @@
   gap: 10px;
   font-size: 11px;
   margin-top: 10px;
-  opacity: 0.65;
+  opacity: 1;
 }
 
 .ts-r-dot {
@@ -318,9 +320,7 @@
 .ts-r-after {
   background: var(--ts-accent);
   border: 1px solid var(--ts-accent);
-;
 }
-
 
 .ts-stat-grid {
   display: grid;
@@ -452,9 +452,7 @@
   }
 }
 
-
 @media (max-width: 1024px) {
-
   .ts-body {
     gap: 40px;
   }
@@ -470,11 +468,9 @@
   .ts-radar {
     max-width: 380px;
   }
-
 }
 
 @media (max-width: 768px) {
-
   .tsection {
     padding: 80px 25px;
   }
@@ -482,10 +478,6 @@
   .ts-body {
     grid-template-columns: 1fr;
     gap: 50px;
-  }
-
-  .ts-header {
-    margin-bottom: 40px;
   }
 
   .ts-title {
@@ -499,11 +491,9 @@
   .ts-stat-grid {
     gap: 18px;
   }
-
 }
 
 @media (max-width: 480px) {
-
   .tsection {
     padding: 60px 18px;
   }
@@ -542,9 +532,7 @@
     font-size: 11px;
     padding: 6px 12px;
   }
-
 }
-
 
 @media (max-width: 480px) {
   .ts-radar-wrap svg {
@@ -553,3 +541,202 @@
   }
 }
 
+.ts-legend-label {
+  cursor: pointer;
+  font-size: 13px;
+  opacity: 0.5;
+  transition:
+    opacity 0.25s ease,
+    color 0.25s ease;
+  user-select: none;
+}
+
+.ts-legend-label.ts-legend-active {
+  opacity: 1;
+  font-weight: 700;
+}
+
+.ts-legend-dot {
+  cursor: pointer;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.ts-legend-dot.ts-legend-active {
+  transform: scale(1.4);
+  box-shadow: 0 0 6px var(--ts-accent);
+}
+
+.ts-r-dot {
+  cursor: pointer;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.ts-r-dot.ts-legend-active {
+  transform: scale(1.4);
+  box-shadow: 0 0 6px var(--ts-accent);
+}
+
+.ts-bar-hover-zone {
+  position: absolute;
+  height: 100%;
+  top: 0;
+  z-index: 10;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.ts-tooltip {
+  position: absolute;
+  transform: translateX(-50%) translateY(calc(-100% - 14px));
+  z-index: 100;
+  min-width: 180px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  pointer-events: none;
+  backdrop-filter: blur(12px);
+}
+
+.ts-dark .ts-tooltip {
+  background: rgba(18, 18, 18, 0.96);
+  border: 1px solid rgba(247, 198, 81, 0.2);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+.ts-light .ts-tooltip {
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid rgba(5, 56, 89, 0.15);
+  box-shadow: 0 8px 32px rgba(5, 56, 89, 0.12);
+}
+
+.ts-tooltip-header {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ts-tooltip-badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: #000;
+  padding: 2px 8px;
+  border-radius: 20px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  opacity: 0.9;
+}
+
+.ts-tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 5px;
+}
+
+.ts-tooltip-label {
+  font-size: 11px;
+  opacity: 0.55;
+}
+
+.ts-dark .ts-tooltip-label {
+  color: #fff;
+}
+.ts-light .ts-tooltip-label {
+  color: #053859;
+}
+
+.ts-tooltip-val {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.ts-tooltip-bar {
+  margin-top: 8px;
+  height: 4px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.ts-light .ts-tooltip-bar {
+  background: rgba(5, 56, 89, 0.08);
+}
+
+.ts-tooltip-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  opacity: 0.85;
+}
+
+.ts-tooltip-arrow {
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 6px;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+}
+
+.ts-dark .ts-tooltip-arrow {
+  background: rgba(247, 198, 81, 0.2);
+}
+
+.ts-light .ts-tooltip-arrow {
+  background: rgba(5, 56, 89, 0.15);
+}
+
+.ts-legend-label {
+  transition:
+    opacity 0.25s ease,
+    color 0.25s ease,
+    font-weight 0.1s ease;
+}
+
+.ts-scroll-hint {
+  display: inline-block;
+  text-align: center;
+  text-transform: uppercase;
+  backdrop-filter: blur(10px);
+  padding: 10px 22px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  color: white;
+  white-space: nowrap;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+.ts-dark .ts-scroll-hint {
+  color: rgba(247, 198, 81, 0.8);
+  background: rgba(247, 198, 81, 0.08);
+  border: 1px solid rgba(247, 198, 81, 0.2);
+}
+
+.ts-light .ts-scroll-hint {
+  color: rgba(5, 56, 89, 0.7);
+  background: rgba(5, 56, 89, 0.05);
+  border: 1px solid rgba(5, 56, 89, 0.15);
+}
+
+@keyframes hintFade {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

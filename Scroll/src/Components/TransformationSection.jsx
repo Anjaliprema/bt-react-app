@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, useInView, animate } from "framer-motion";
+import { useParallax } from "react-scroll-parallax";
 import "./TransformationSection.css";
 const skills = [
   { name: "HTML & CSS", before: 30, after: 95, color: "#e34f26" },
@@ -46,7 +47,8 @@ function AnimatedCounter({ from, to, suffix, inView, delay = 0 }) {
   );
 }
 
-function RadarChart({ inView }) {
+
+function RadarChart({ inView, view }) {
   const size = 220;
   const cx = size / 2;
   const cy = size / 2;
@@ -66,20 +68,23 @@ function RadarChart({ inView }) {
   }, [inView]);
 
   const angleStep = (2 * Math.PI) / n;
-  const getPoint = (val, i, scale = 1) => {
+
+  const getPoint = (val, i) => {
     const angle = i * angleStep - Math.PI / 2;
-    const d = (val / 100) * r * scale;
+    const d = (val / 100) * r;
     return [cx + d * Math.cos(angle), cy + d * Math.sin(angle)];
   };
+
   const toPath = (pts) =>
     pts.map((p, i) => `${i === 0 ? "M" : "L"}${p[0]},${p[1]}`).join(" ") + "Z";
 
-  const beforePts = radarSkills.map((s, i) =>
-    getPoint(s.before + (s.after - s.before) * 0, i),
-  );
+  const beforePts = radarSkills.map((s, i) => getPoint(s.before, i));
+
   const afterPts = radarSkills.map((s, i) =>
     getPoint(s.before + (s.after - s.before) * progress, i),
   );
+
+  const displayPts = view === "before" ? beforePts : afterPts;
 
   const gridLevels = [25, 50, 75, 100];
 
@@ -97,6 +102,7 @@ function RadarChart({ inView }) {
           />
         );
       })}
+
       {radarSkills.map((_, i) => {
         const [px, py] = getPoint(100, i);
         return (
@@ -119,14 +125,25 @@ function RadarChart({ inView }) {
         strokeWidth="1.5"
       />
 
-      <path
-        d={toPath(afterPts)}
+      <motion.path
+        d={toPath(displayPts)}
         fill="var(--ts-accent-soft)"
         stroke="var(--ts-accent)"
         strokeWidth="2"
+        animate={{ d: toPath(displayPts) }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
       />
-      {afterPts.map(([px, py], i) => (
-        <circle key={i} cx={px} cy={py} r="3.5" fill="var(--ts-accent)" />
+
+      {displayPts.map(([px, py], i) => (
+        <motion.circle
+          key={i}
+          cx={px}
+          cy={py}
+          r="3.5"
+          fill="var(--ts-accent)"
+          animate={{ cx: px, cy: py }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        />
       ))}
 
       {radarSkills.map((s, i) => {
@@ -158,8 +175,15 @@ function RadarChart({ inView }) {
 
 function TransformationSection({ isLight }) {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, amount: 0.2 });
+  const inView = useInView(ref, { once: true, amount: 0.4 });
   const [barProgress, setBarProgress] = useState(0);
+  const [skillView, setSkillView] = useState("after");
+  const [radarView, setRadarView] = useState("after");
+  const [tooltip, setTooltip] = useState(null);
+  const [revealDone, setRevealDone] = useState(false);
+  const revealDoneRef = useRef(false);
+  const cleanupRef = useRef(null);
+  const [showHint, setShowHint] = useState(false);
 
   useEffect(() => {
     if (!inView) return;
@@ -172,6 +196,99 @@ function TransformationSection({ isLight }) {
     return controls.stop;
   }, [inView]);
 
+  useEffect(() => {
+    if (!inView || revealDoneRef.current) return;
+
+    const scrollY = window.scrollY;
+
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+
+    setSkillView("before");
+    setRadarView("before");
+
+    const listenTimer = setTimeout(() => {
+      const runReveal = () => {
+        if (revealDoneRef.current) return;
+        revealDoneRef.current = true;
+
+        setSkillView("after");
+        setRadarView("after");
+
+        window.removeEventListener("wheel", blockScroll);
+        window.removeEventListener("touchmove", blockScroll);
+        window.removeEventListener("keydown", handleKey);
+        window.removeEventListener("click", runReveal);
+
+        setTimeout(() => {
+          document.body.style.overflow = "";
+          document.documentElement.style.overflow = "";
+          setRevealDone(true);
+        }, 1800);
+      };
+
+      const handleKey = (e) => {
+        const scrollKeys = [
+          "ArrowDown",
+          "ArrowUp",
+          "PageDown",
+          "PageUp",
+          "Space",
+        ];
+        if (scrollKeys.includes(e.code)) {
+          e.preventDefault();
+          runReveal();
+        }
+      };
+
+      const blockScroll = (e) => {
+        e.preventDefault();
+        runReveal();
+      };
+
+      window.addEventListener("wheel", blockScroll, { passive: false });
+      window.addEventListener("touchmove", blockScroll, { passive: false });
+      window.addEventListener("keydown", handleKey);
+      window.addEventListener("click", runReveal);
+
+      cleanupRef.current = () => {
+        window.removeEventListener("wheel", blockScroll);
+        window.removeEventListener("touchmove", blockScroll);
+        window.removeEventListener("keydown", handleKey);
+        window.removeEventListener("click", runReveal);
+      };
+    }, 1500);
+
+    return () => {
+      clearTimeout(listenTimer);
+      if (cleanupRef.current) cleanupRef.current();
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+    };
+  }, [inView]);
+
+  useEffect(() => {
+    if (!inView || revealDoneRef.current) return;
+    setShowHint(true);
+    const t = setTimeout(() => setShowHint(false), 2000);
+    return () => clearTimeout(t);
+  }, [inView]);
+
+  const aboutText = useParallax({
+    translateY: [-40, 0],
+    opacity: [0, 1],
+    easing: "easeInOut",
+  });
+
+  const aboutTitle = useParallax({
+    translateY: [-80, 0],
+    opacity: [0, 1],
+    scale: [1, 1.2],
+    easing: "easeOut",
+  });
+
+
+
   return (
     <section
       className={`tsection ${isLight ? "ts-light" : "ts-dark"}`}
@@ -183,97 +300,267 @@ function TransformationSection({ isLight }) {
         animate={inView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.7 }}
       >
-        <span className="ts-eyebrow">Student Transformation</span>
-        <h2 className="ts-title">From Beginner to Industry-Ready</h2>
-        <p className="ts-sub">
+        
+        <h2 ref={aboutTitle.ref} className="ts-title">
+          From Beginner to Industry-Ready
+        </h2>
+        <p ref={aboutText.ref} className="ts-sub">
           Real skill growth in 15 days — measured, tracked, proven
         </p>
       </motion.div>
+      <div style={{ position: "relative" }}>
+        <div className="ts-body">
+          <motion.div
+            className="ts-panel ts-bars"
+            initial={{ opacity: 0, x: -50 }}
+            animate={inView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.7, delay: 0.15 }}
+          >
+            <h3 className="ts-panel-title">Skill Level Growth</h3>
 
-      <div className="ts-body">
-        <motion.div
-          className="ts-panel ts-bars"
-          initial={{ opacity: 0, x: -50 }}
-          animate={inView ? { opacity: 1, x: 0 } : {}}
-          transition={{ duration: 0.7, delay: 0.15 }}
-        >
-          <h3 className="ts-panel-title">Skill Level Growth</h3>
-          <div className="ts-legend">
-            <span className="ts-legend-dot ts-legend-before" />{" "}
-            <span>Before</span>
-            <span
-              className="ts-legend-dot ts-legend-after"
-              style={{ marginLeft: 16 }}
-            />{" "}
-            <span>After</span>
-          </div>
-
-          <div className="ts-skill-list">
-            {skills.map((skill, i) => {
-              const afterVal =
-                skill.before + (skill.after - skill.before) * barProgress;
-              return (
-                <motion.div
-                  key={skill.name}
-                  className="ts-skill-row"
-                  initial={{ opacity: 0, y: 18 }}
-                  animate={inView ? { opacity: 1, y: 0 } : {}}
-                  transition={{ delay: 0.25 + i * 0.08 }}
+            <div className="ts-legend" style={{ display: "flex", gap: 8 }}>
+              {["before", "after"].map((v) => (
+                <motion.button
+                  key={v}
+                  onClick={() => setSkillView(v)}
+                  style={{
+                    position: "relative",
+                    padding: "6px 18px",
+                    borderRadius: 20,
+                    border: "1.5px solid",
+                    borderColor:
+                      skillView === v ? "var(--ts-accent)" : "var(--ts-grid)",
+                    background:
+                      skillView === v ? "var(--ts-accent-soft)" : "transparent",
+                    color:
+                      skillView === v
+                        ? "var(--ts-accent)"
+                        : "var(--ts-text-soft)",
+                    fontWeight: skillView === v ? 600 : 400,
+                    fontSize: "0.78rem",
+                    letterSpacing: "0.04em",
+                    cursor: "pointer",
+                    overflow: "hidden",
+                    opacity: 1,
+                    transition:
+                      "color 0.3s ease, border-color 0.3s ease, background 0.3s ease",
+                  }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  <div className="ts-skill-meta">
-                    <span className="ts-skill-name">{skill.name}</span>
+                  {skillView === v && (
+                    <motion.span
+                      layoutId="skillActiveBg"
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        background: "var(--ts-accent)",
+                        opacity: 0.12,
+                        borderRadius: 20,
+                      }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 300,
+                        damping: 28,
+                      }}
+                    />
+                  )}
+                  {v.charAt(0).toUpperCase() + v.slice(1)}
+                </motion.button>
+              ))}
+            </div>
+
+            <div className="ts-skill-list" style={{ position: "relative" }}>
+              {skills.map((skill, i) => {
+                const displayVal =
+                  skillView === "after"
+                    ? skill.before + (skill.after - skill.before) * barProgress
+                    : skill.before;
+
+                return (
+                  <motion.div
+                    key={skill.name}
+                    className="ts-skill-row"
+                    initial={{ opacity: 0, y: 18 }}
+                    animate={inView ? { opacity: 1, y: 0 } : {}}
+                    transition={{ delay: 0.25 + i * 0.08 }}
+                    onMouseMove={(e) => {
+                      const list = e.currentTarget.closest(".ts-skill-list");
+                      const listRect = list.getBoundingClientRect();
+                      const track =
+                        e.currentTarget.querySelector(".ts-bar-track");
+                      const trackRect = track.getBoundingClientRect();
+                      setTooltip({
+                        x: trackRect.left - listRect.left + trackRect.width / 2,
+                        y: trackRect.top - listRect.top - 75,
+                        skill,
+                      });
+                    }}
+                    onMouseLeave={() => setTooltip(null)}
+                  >
+                    <div className="ts-skill-meta">
+                      <span className="ts-skill-name">{skill.name}</span>
+                      <span
+                        className="ts-skill-val"
+                        style={{ color: skill.color }}
+                      >
+                        {Math.round(displayVal)}%
+                      </span>
+                    </div>
+
+                    <div className="ts-bar-track">
+                      <motion.div
+                        className="ts-bar-fill"
+                        style={{
+                          background: `linear-gradient(90deg, ${skill.color}88, ${skill.color})`,
+                          boxShadow: `0 0 10px ${skill.color}55`,
+                        }}
+                        animate={{ width: `${Math.round(displayVal)}%` }}
+                        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                      />
+                      <div
+                        className="ts-bar-marker"
+                        style={{ left: `${skill.before}%` }}
+                      />
+                    </div>
+                  </motion.div>
+                );
+              })}
+
+              {tooltip && (
+                <motion.div
+                  className="ts-tooltip"
+                  style={{ left: tooltip.x, top: tooltip.y }}
+                  initial={{ opacity: 0, y: 6, scale: 0.92 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.18 }}
+                >
+                  <div className="ts-tooltip-row">
+                    <span className="ts-tooltip-label">
+                      {skillView === "before" ? "Current Level" : "Improvement"}
+                    </span>
                     <span
-                      className="ts-skill-val"
-                      style={{ color: skill.color }}
+                      className="ts-tooltip-val"
+                      style={{ color: tooltip.skill.color }}
                     >
-                      {Math.round(afterVal)}%
+                      {skillView === "before"
+                        ? `${tooltip.skill.before}%`
+                        : `+${tooltip.skill.after - tooltip.skill.before}%`}
                     </span>
                   </div>
 
-                  <div className="ts-bar-track">
-                    <div
-                      className="ts-bar-ghost"
-                      style={{ width: `${skill.before}%` }}
-                    />
-                    <div
-                      className="ts-bar-fill"
+                  <div className="ts-tooltip-row">
+                    <span className="ts-tooltip-label">Status</span>
+                    <span
+                      className="ts-tooltip-val"
+                      style={{ color: tooltip.skill.color }}
+                    >
+                      {skillView === "before"
+                        ? tooltip.skill.before === 0
+                          ? "Not started"
+                          : tooltip.skill.before < 30
+                            ? "Beginner"
+                            : "Familiar"
+                        : tooltip.skill.after >= 90
+                          ? "Expert"
+                          : tooltip.skill.after >= 80
+                            ? "Advanced"
+                            : "Proficient"}
+                    </span>
+                  </div>
+
+                  <div className="ts-tooltip-arrow" />
+                </motion.div>
+              )}
+            </div>
+          </motion.div>
+
+          <motion.div
+            className="ts-panel ts-radar"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={inView ? { opacity: 1, scale: 1 } : {}}
+            transition={{ duration: 0.8, delay: 0.3 }}
+          >
+            <h3 className="ts-panel-title">Competency Radar</h3>
+            <div
+              className="ts-radar-legend"
+              style={{ display: "flex", gap: 8 }}
+            >
+              {["before", "after"].map((v) => (
+                <motion.button
+                  key={v}
+                  onClick={() => setRadarView(v)}
+                  style={{
+                    position: "relative",
+                    padding: "6px 18px",
+                    borderRadius: 20,
+                    border: "1.5px solid",
+                    borderColor:
+                      radarView === v ? "var(--ts-accent)" : "var(--ts-grid)",
+                    background:
+                      radarView === v ? "var(--ts-accent-soft)" : "transparent",
+                    color:
+                      radarView === v
+                        ? "var(--ts-accent)"
+                        : "var(--ts-text-soft)",
+                    fontWeight: radarView === v ? 600 : 400,
+                    fontSize: "0.78rem",
+                    letterSpacing: "0.04em",
+                    cursor: "pointer",
+                    overflow: "hidden",
+                    opacity: 1,
+                    transition:
+                      "color 0.3s ease, border-color 0.3s ease, background 0.3s ease",
+                  }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  {radarView === v && (
+                    <motion.span
+                      layoutId="radarActiveBg"
                       style={{
-                        width: `${afterVal}%`,
-                        background: `linear-gradient(90deg, ${skill.color}88, ${skill.color})`,
-                        boxShadow: `0 0 10px ${skill.color}55`,
+                        position: "absolute",
+                        inset: 0,
+                        background: "var(--ts-accent)",
+                        opacity: 0.12,
+                        borderRadius: 20,
+                      }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 300,
+                        damping: 28,
                       }}
                     />
-                    <div
-                      className="ts-bar-marker"
-                      style={{ left: `${skill.before}%` }}
-                    />
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
-        </motion.div>
+                  )}
+                  {v.charAt(0).toUpperCase() + v.slice(1)}
+                </motion.button>
+              ))}
+            </div>
 
-        <motion.div
-          className="ts-panel ts-radar"
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={inView ? { opacity: 1, scale: 1 } : {}}
-          transition={{ duration: 0.8, delay: 0.3 }}
-        >
-          <h3 className="ts-panel-title">Competency Radar</h3>
-          <div className="ts-radar-legend">
-            <span className="ts-r-dot ts-r-before" /> <span>Before</span>
-            <span
-              className="ts-r-dot ts-r-after"
-              style={{ marginLeft: 12 }}
-            />{" "}
-            <span>After</span>
-          </div>
-          <br />
-          <div className="ts-radar-wrap">
-            <RadarChart inView={inView} />
-          </div>
-        </motion.div>
+            <div className="ts-radar-wrap">
+              <RadarChart inView={inView} view={radarView} />
+            </div>
+          </motion.div>
+        </div>
+
+        {showHint && (
+          <motion.div
+            className="ts-scroll-hint"
+            style={{
+              position: "absolute",
+              top: "20%",
+              left: "37%",
+              transform: "translate(-50%, -50%)",
+              zIndex: 10,
+              pointerEvents: "none",
+            }}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ delay: 0.5, duration: 0.6 }}
+          >
+            ↓ Scroll to reveal the transformation
+          </motion.div>
+        )}
       </div>
 
       <motion.div
@@ -287,14 +574,14 @@ function TransformationSection({ isLight }) {
           damping: 12,
         }}
       >
-        <span>15 Days</span>
+        <span></span>
       </motion.div>
 
       <motion.div
         className="ts-panel ts-stats"
         initial={{ opacity: 0, x: 50 }}
         animate={inView ? { opacity: 1, x: 0 } : {}}
-        transition={{ duration: 0.7, delay: 0.2 }}
+        transition={{ duration: 0.7, delay: 2.0 }}
       >
         <h3 className="ts-panel-title">Key Outcomes</h3>
 
