@@ -5,7 +5,7 @@ import Header from "./Header";
 import Footer from "./Footer";
 
 const API_URL = "http://localhost:5000";
-const EMAIL = "anjaliprema4321@gmail.com";
+const EMAIL = "training@thebettertomorrow.in";
 
 const COURSES = [
   "Full Stack Development",

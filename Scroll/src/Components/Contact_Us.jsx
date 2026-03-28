@@ -1208,7 +1208,7 @@ export default function ContactUs() {
             
 
             <a
-              href="https://mail.google.com/mail/?view=cm&fs=1&to=anjaliprema4321@gmail.com&su=New%20Course%20Enquiry%20-%20The%20Better%20Tomorrow&body=Hi%20Team%2C%0A%0A%2F%2F%2F%20Type%20your%20message%20here%0A/// Kindly%20mention%20your%20name%2C%20phone%20number%2C%20and%20the%20course%20you%27re%20interested%20in%20so%20we%20can%20get%20back%20to%20you%20quickly."
+              href="https://mail.google.com/mail/?view=cm&fs=1&to=training@thebettertomorrow.in&su=New%20Course%20Enquiry%20-%20The%20Better%20Tomorrow&body=Hi%20Team%2C%0A%0A%2F%2F%2F%20Type%20your%20message%20here%0A/// Kindly%20mention%20your%20name%2C%20phone%20number%2C%20and%20the%20course%20you%27re%20interested%20in%20so%20we%20can%20get%20back%20to%20you%20quickly."
               rel="noopener noreferrer"
               target="_blank"
               style={{ textDecoration: "none" }}
