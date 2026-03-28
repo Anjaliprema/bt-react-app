@@ -1,0 +1,233 @@
+.roadmap-page {
+  min-height: 100vh;
+  width: 1310px;
+  padding: 120px 20px 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.roadmap-title {
+  text-align: center;
+  font-size: 26px;
+  margin: 20px 0;
+}
+.dark-theme .roadmap-title {
+  color: #f7c651;
+}
+
+.light-theme .roadmap-title {
+  color: #053859;
+}
+
+.language-select {
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+  margin-bottom: 40px;
+}
+
+.dark-theme .language-select button {
+  padding: 10px 28px;
+  border-radius: 30px;
+  border: 2px solid #f7c651;
+  background: transparent;
+  cursor: pointer;
+  transition: 0.3s ease;
+  color: #ffffff;
+}
+.light-theme .language-select button {
+  padding: 10px 28px;
+  border-radius: 30px;
+  border: 2px solid #053859;
+  background-color: white;
+  cursor: pointer;
+  transition: 0.3s ease;
+  color: #053859;
+}
+
+.light-theme .language-select button:hover,
+.language-select button.active {
+  background: #053859;
+  color: white;
+  transform: translateY(-3px);
+}
+.light-theme 
+.language-select button.active {
+  background: #053859;
+  color: white;
+  transform: translateY(-3px);
+}
+.dark-theme .language-select button:hover,
+.language-select button.active {
+  background: #f7c651;
+  color: black;
+  transform: translateY(-3px);
+}
+
+.timeline {
+  position: relative;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.timeline::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 4px;
+  height: 100%;
+  background: #f7c651;
+  transform: translateX(-50%);
+}
+.light-theme .timeline::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 4px;
+  height: 100%;
+  background: #053859;
+  transform: translateX(-50%);
+}
+
+.timeline-step {
+  position: relative;
+  width: 50%;
+  padding: 20px 40px;
+  box-sizing: border-box;
+  cursor: pointer;
+  transition: 0.4s ease;
+}
+
+.timeline-step.left {
+  left: 0;
+  text-align: right;
+}
+
+.timeline-step.right {
+  left: 50%;
+}
+
+.timeline-step:hover {
+  transform: scale(1.03);
+}
+
+.circle {
+  position: absolute;
+  top: 25px;
+  width: 35px;
+  height: 35px;
+  background: #f7c651;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 35px;
+  font-weight: bold;
+  color: #000;
+}
+.light-theme .circle {
+  position: absolute;
+  top: 25px;
+  width: 35px;
+  height: 35px;
+  background: #053859;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 35px;
+  font-weight: bold;
+  color: white;
+}
+
+.timeline-step.left .circle {
+  right: -17px;
+}
+
+.timeline-step.right .circle {
+  left: -17px;
+}
+
+.step-content {
+  padding: 20px;
+  border-radius: 12px;
+  transition: 0.3s ease;
+}
+
+.dark-theme .step-content {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+}
+
+.light-theme .step-content {
+  background: rgba(5, 56, 89, 0.05);
+  color: #053859;
+}
+
+.timeline-step.open .step-content {
+  border: 1px solid #f7c651;
+}
+.light-theme .timeline-step.open .step-content {
+  border: 1px solid #053859;
+}
+.step-content h3 {
+  margin: 0;
+}
+.dark-theme .step-content h3 {
+  color: #f7c651;
+}
+
+.light-theme .step-content h3 {
+  color: #053859;
+}
+
+.resources {
+  margin-top: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: fadeDown 0.4s ease;
+}
+
+@keyframes fadeDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.resources a {
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(247, 198, 81, 0.15);
+  transition: 0.3s;
+}
+.light-theme .resources a {
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #0537592c;
+  transition: 0.3s;
+}
+.dark-theme .resources a {
+  color: #ffffff;
+}
+
+.light-theme .resources a {
+  color: #053859;
+}
+
+.resources a:hover {
+  background: #f7c651;
+  color: #000;
+  transform: translateX(5px);
+}
+.light-theme .resources a:hover {
+  background: #053859;
+  color: white;
+  transform: translateX(5px);
+}
