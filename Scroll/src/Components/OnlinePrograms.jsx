@@ -1301,7 +1301,7 @@ export default function OnlinePrograms() {
             layout={false}
           >
             <a
-              href="mailto:anjaliprema4321@gmail.com"
+              href="mailto:training@thebettertomorrow.in"
               className="op-btn-primary btn-2"
               style={{
                 background: themeGradient,
@@ -1530,7 +1530,7 @@ export default function OnlinePrograms() {
                       const body = encodeURIComponent(
                         `Course: ${applyFor}\nName: ${applyForm.name}\nEmail: ${applyForm.email}\nPhone: ${applyForm.phone}\nRole: ${applyForm.role}\nCollege: ${applyForm.college}\nYear: ${applyForm.year}\nDuration: ${applyForm.duration}\nSlot: ${applyForm.slot}`,
                       );
-                      window.location.href = `mailto:anjaliprema4321@gmail.com.in?subject=${subject}&body=${body}`;
+                      window.location.href = `mailto:training@thebettertomorrow.in?subject=${subject}&body=${body}`;
                       setApplySubmitted(true);
                     }}
                   >
