@@ -1,8 +1,9 @@
 import StudentPlacements from "./StudentPlacements";
 import About from "./About";
+import Header from "./Header";
+import HeroSlider from "./Homeslider";
+import Footer from "./Footer";
 import "./Home_Static.css";
-import LightLogo from "../assets/download.png";
-import DarkLogo from "../assets/altimg.png";
 import { motion } from "framer-motion";
 import TransformationSection from "./TransformationSection";
 import { useState, useEffect, useRef } from "react";
@@ -30,40 +31,28 @@ import logo4 from "../assets/logo4.png";
 import logo5 from "../assets/logo5.png";
 import { GoArrowUpRight } from "react-icons/go";
 import {
-  FaMoon,
-  FaSun,
-  FaArrowRight,
   FaCheckCircle,
   FaUsers,
   FaBriefcase,
   FaChartLine,
 } from "react-icons/fa";
-import RoadMap from "./RoadMap";
 
 function Home() {
-  const [isLight, setIsLight] = useState(false);
-  const [page, setPage] = useState("home");
-  const [isScrolled, setIsScrolled] = useState(false);
+  const [isLight, setIsLight] = useState(() => {
+    const saved = localStorage.getItem("theme");
+    return saved ? saved === "light" : true;
+  });
+
   const glowRef = useRef(null);
-  const floatingRef = useRef(null);
+ 
 
-  const toggleTheme = () => {
-    setIsLight((prev) => !prev);
-  };
-
-  const scrollToSection = (id) => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
-  };
 
   const colleges = [
     {
       name: "Bannari Amman Institute Of Technology, Erode",
       program: "Mern stack training 15 days",
       image: clgimg1,
-      logo: logo1,
+      logo: logo1, 
       link: "https://www.bitsathy.ac.in",
     },
     {
@@ -171,35 +160,6 @@ function Home() {
     },
   ];
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 80) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const heroTitle = useParallax({
-    translateY: [-120, 0],
-    scale: [1, 1.1],
-    easing: "easeOut",
-  });
-
-  const heroSubtitle = useParallax({
-    translateY: [-60, 0],
-    scale: [1, 1.3],
-    easing: "easeInOut",
-  });
-
-  const heroButton = useParallax({
-    translateY: [10, 0],
-    easing: "easeOut",
-  });
 
   const containerVariants = {
     hidden: {},
@@ -225,6 +185,7 @@ function Home() {
     speed: -10,
   });
   const statsh2Parallax = useParallax({
+    opacity: [0, 1],
     translateY: [120, -160],
     scale: [1, 1.3],
     speed: 10,
@@ -268,6 +229,14 @@ function Home() {
     easing: "easeInOut",
   });
 
+useEffect(() => {
+  const handler = () => {
+    setIsLight(localStorage.getItem("theme") !== "dark");
+  };
+  window.addEventListener("themechange", handler);
+  return () => window.removeEventListener("themechange", handler);
+}, []);
+
   useEffect(() => {
     const move = (e) => {
       if (glowRef.current) {
@@ -283,7 +252,6 @@ function Home() {
 
   useEffect(() => {
     const counters = document.querySelectorAll(".count-up");
-
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -291,10 +259,8 @@ function Home() {
             const counter = entry.target;
             const target = +counter.getAttribute("data-target");
             let count = 0;
-
             const updateCount = () => {
               const increment = target / 100;
-
               if (count < target) {
                 count += increment;
                 counter.innerText = Math.ceil(count);
@@ -303,7 +269,6 @@ function Home() {
                 counter.innerText = target;
               }
             };
-
             updateCount();
             observer.unobserve(counter);
           }
@@ -311,510 +276,620 @@ function Home() {
       },
       { threshold: 0.6 },
     );
-
     counters.forEach((counter) => observer.observe(counter));
-
     return () => observer.disconnect();
   }, []);
 
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      const { innerWidth, innerHeight } = window;
 
-      const x = (e.clientX - innerWidth / 2) / 60;
-      const y = (e.clientY - innerHeight / 2) / 60;
 
-      if (floatingRef.current) {
-        floatingRef.current.style.transform = `translate(${x}px, ${y}px)`;
-      }
-    };
+  const FeatureIcon = ({ type }) => {
+    const stroke = !isLight ? "#f7c651" : "#053859";
 
-    window.addEventListener("mousemove", handleMouseMove);
+    if (type === "industry")
+      return (
+        <svg
+          width="38"
+          height="38"
+          viewBox="0 0 38 38"
+          fill="none"
+          className="ts-svg-icon"
+        >
+          <rect
+            x="3"
+            y="18"
+            width="8"
+            height="17"
+            rx="2"
+            stroke={stroke}
+            strokeWidth="2"
+            className="ts-svg-path"
+          />
+          <rect
+            x="15"
+            y="11"
+            width="8"
+            height="24"
+            rx="2"
+            stroke={stroke}
+            strokeWidth="2"
+            className="ts-svg-path"
+          />
+          <rect
+            x="27"
+            y="4"
+            width="8"
+            height="31"
+            rx="2"
+            stroke={stroke}
+            strokeWidth="2"
+            className="ts-svg-path"
+          />
+          <line
+            x1="3"
+            y1="35"
+            x2="35"
+            y2="35"
+            stroke={stroke}
+            strokeWidth="2"
+            strokeLinecap="round"
+            className="ts-svg-path"
+          />
+          <circle
+            cx="7"
+            cy="14"
+            r="2.5"
+            stroke={stroke}
+            strokeWidth="1.5"
+            className="ts-svg-path"
+          />
+          <circle
+            cx="19"
+            cy="7"
+            r="2.5"
+            stroke={stroke}
+            strokeWidth="1.5"
+            className="ts-svg-path"
+          />
+          <circle
+            cx="31"
+            cy="0.5"
+            r="2.5"
+            stroke={stroke}
+            strokeWidth="1.5"
+            className="ts-svg-path"
+          />
+          <polyline
+            points="7,14 19,7 31,1"
+            stroke={stroke}
+            strokeWidth="1.5"
+            strokeDasharray="3 2"
+            className="ts-svg-path"
+          />
+        </svg>
+      );
 
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
+    if (type === "interview")
+      return (
+        <svg
+          width="38"
+          height="38"
+          viewBox="0 0 38 38"
+          fill="none"
+          className="ts-svg-icon"
+        >
+          <rect
+            x="3"
+            y="5"
+            width="32"
+            height="22"
+            rx="3"
+            stroke={stroke}
+            strokeWidth="2"
+            className="ts-svg-path"
+          />
+          <line
+            x1="19"
+            y1="27"
+            x2="19"
+            y2="33"
+            stroke={stroke}
+            strokeWidth="2"
+            strokeLinecap="round"
+            className="ts-svg-path"
+          />
+          <line
+            x1="12"
+            y1="33"
+            x2="26"
+            y2="33"
+            stroke={stroke}
+            strokeWidth="2"
+            strokeLinecap="round"
+            className="ts-svg-path"
+          />
+          <polyline
+            points="10,14 15,19 28,10"
+            stroke={stroke}
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="ts-svg-path"
+          />
+        </svg>
+      );
+
+    if (type === "guidance")
+      return (
+        <svg
+          width="38"
+          height="38"
+          viewBox="0 0 38 38"
+          fill="none"
+          className="ts-svg-icon"
+        >
+          <circle
+            cx="14"
+            cy="11"
+            r="7"
+            stroke={stroke}
+            strokeWidth="2"
+            className="ts-svg-path"
+          />
+          <path
+            d="M3 35c0-6.075 4.925-11 11-11"
+            stroke={stroke}
+            strokeWidth="2"
+            strokeLinecap="round"
+            className="ts-svg-path"
+          />
+          <circle
+            cx="28"
+            cy="24"
+            r="7"
+            stroke={stroke}
+            strokeWidth="2"
+            className="ts-svg-path"
+          />
+          <line
+            x1="28"
+            y1="20"
+            x2="28"
+            y2="24"
+            stroke={stroke}
+            strokeWidth="2"
+            strokeLinecap="round"
+            className="ts-svg-path"
+          />
+          <circle
+            cx="28"
+            cy="27"
+            r="1.2"
+            fill={stroke}
+            className="ts-svg-path"
+          />
+        </svg>
+      );
+
+    if (type === "progress")
+      return (
+        <svg
+          width="38"
+          height="38"
+          viewBox="0 0 38 38"
+          fill="none"
+          className="ts-svg-icon"
+        >
+          <circle
+            cx="19"
+            cy="19"
+            r="15"
+            stroke={stroke}
+            strokeWidth="2"
+            className="ts-svg-path"
+          />
+          <path
+            d="M19 19 L19 7"
+            stroke={stroke}
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            className="ts-svg-path"
+          />
+          <path
+            d="M19 19 L28 24"
+            stroke={stroke}
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            className="ts-svg-path"
+          />
+          <circle
+            cx="19"
+            cy="19"
+            r="2.5"
+            fill={stroke}
+            className="ts-svg-path"
+          />
+          <line
+            x1="19"
+            y1="4"
+            x2="19"
+            y2="6"
+            stroke={stroke}
+            strokeWidth="2"
+            strokeLinecap="round"
+            className="ts-svg-path"
+          />
+          <line
+            x1="19"
+            y1="32"
+            x2="19"
+            y2="34"
+            stroke={stroke}
+            strokeWidth="2"
+            strokeLinecap="round"
+            className="ts-svg-path"
+          />
+          <line
+            x1="4"
+            y1="19"
+            x2="6"
+            y2="19"
+            stroke={stroke}
+            strokeWidth="2"
+            strokeLinecap="round"
+            className="ts-svg-path"
+          />
+          <line
+            x1="32"
+            y1="19"
+            x2="34"
+            y2="19"
+            stroke={stroke}
+            strokeWidth="2"
+            strokeLinecap="round"
+            className="ts-svg-path"
+          />
+        </svg>
+      );
+  };
 
   return (
     <div className={isLight ? "light-theme" : "dark-theme"}>
       <div ref={glowRef} className="cursor-glow" />
 
-      <header className={`header ${isScrolled ? "scrolled" : ""}`}>
-        <div className="header-content">
+      <Header />
+
+      
+    
+
+      <motion.main
+        className="main-content"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.9, ease: [0.77, 0, 0.175, 1] }}
+      >
+        <HeroSlider />
+       
+
+        <section className="stats-section animate-on-scroll">
+          <h2 ref={statsh2Parallax.ref}>Catalysing Your Path to Success</h2>
           <motion.div
-            className="logo-section"
-            initial={{ x: -100, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-          >
-            <img
-              src={isLight ? LightLogo : DarkLogo}
-              alt="BT logo"
-              onClick={() => setPage("home")}
-            />
-
-            {!isScrolled && (
-              <div className="logo-text">
-                <h1 onClick={() => setPage("home")}>Better Tomorrow</h1>
-                <p onClick={() => setPage("home")}>
-                  Building Skills for the Future
-                </p>
-              </div>
-            )}
-          </motion.div>
-
-          <motion.nav
-            className="nav-menu"
-            initial={{ x: 100, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-          >
-            <a onClick={() => scrollToSection("home")}>Home</a>
-            <a onClick={() => scrollToSection("about")}>About</a>
-            <a onClick={() => scrollToSection("programs")}>Programs</a>
-            <a onClick={() => scrollToSection("achievements")}>Achievements</a>
-            <a onClick={() => scrollToSection("placements")}>Placements</a>
-
-            <a onClick={() => setPage("roadmap")} className="roadmap-btn btn-2">
-              Road Map
-            </a>
-          </motion.nav>
-
-          <motion.div
-            className="theme-toggle"
-            onClick={toggleTheme}
-            initial={{ scale: 0, opacity: 0, rotateY: -180 }}
-            animate={{ scale: 1, opacity: 1, rotateY: 0 }}
-            transition={{
-              duration: 0.6,
-              delay: 0.5,
-              ease: [0.34, 1.56, 0.64, 1],
-            }}
-            style={{ perspective: 400 }}
+            ref={statsParallax.ref}
+            className="stats-container"
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true }}
           >
             <motion.div
-              className="toggle-3d-wrap"
-              animate={{ rotateY: isLight ? 0 : 180 }}
-              transition={{ duration: 0.55, ease: [0.34, 1.4, 0.64, 1] }}
-              style={{
-                transformStyle: "preserve-3d",
-                position: "relative",
-                width: 38,
-                height: 38,
+              className="stat-card"
+              style={{ animationDelay: "0.1s" }}
+              variants={cardVariants}
+            >
+              <div className="stat-icon rotate-on-hover">
+                <FaChartLine />
+              </div>
+              <br />
+              <span className="count-up" data-target="6">
+                0
+              </span>
+              <span> LPA</span>
+              <p>Average Dream Job CTC</p>
+            </motion.div>
+
+            <motion.div
+              className="stat-card"
+              style={{ animationDelay: "0.2s" }}
+              variants={cardVariants}
+            >
+              <div className="stat-icon rotate-on-hover">
+                <FaBriefcase />
+              </div>
+              <br />
+              <span className="count-up" data-target="200">
+                0
+              </span>
+              <span>+</span>
+              <p>Product Offers</p>
+            </motion.div>
+
+            <motion.div
+              className="stat-card"
+              style={{ animationDelay: "0.3s" }}
+              variants={cardVariants}
+            >
+              <div className="stat-icon rotate-on-hover">
+                <FaUsers />
+              </div>
+              <br />
+              <span className="count-up" data-target="5000">
+                0
+              </span>
+              <span>+</span>
+              <p>Job Opportunities</p>
+            </motion.div>
+
+            <motion.div
+              className="stat-card"
+              style={{ animationDelay: "0.4s" }}
+              variants={cardVariants}
+            >
+              <div className="stat-icon rotate-on-hover">
+                <FaCheckCircle />
+              </div>
+              <br />
+              <span className="count-up" data-target="24">
+                0
+              </span>
+              <span> LPA</span>
+              <p>Highest Package</p>
+            </motion.div>
+          </motion.div>
+        </section>
+
+        <section id="about" className="about-section">
+          <div className="section-header">
+            <h2 ref={cardTitle.ref}>
+              Blaze A Trail On Our Pathway To Turbocharge Your Tech Career!
+            </h2>
+            <p ref={cardText.ref}>
+              At Better Tomorrow, we immerse budding talents in live industrial
+              projects and real-world problem-solving. We fortify their
+              confidence with a solid foundation in industry essentials.
+            </p>
+          </div>
+
+          <div>
+            <About />
+          </div>
+        </section>
+
+        <section id="programs" className="programs-section">
+          <div className="section-header">
+            <h2 ref={aboutTitleProgram.ref}>
+              Extensive Programs From Domain Experts That Meets Industry
+              Expectations
+            </h2>
+          </div>
+          <div className="programs-slider">
+            <motion.div
+              className="programs-track"
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{
+                duration: 0.6,
+                delay: 0.2,
+                ease: "easeOut",
               }}
             >
-              <div className="toggle-face toggle-front">
-                <FaMoon />
-              </div>
-              <div className="toggle-face toggle-back">
-                <FaSun />
-              </div>
+              {[...programs, ...programs].map((program, idx) => (
+                <div key={idx} className="program-card">
+                  <img src={program.img} alt={program.title} />
+                  <h3>{program.title}</h3>
+                  <p>{program.description}</p>
+                </div>
+              ))}
             </motion.div>
-          </motion.div>
-        </div>
-      </header>
+          </div>
 
-      {page === "home" ? (
-        <main className="main-content">
-          <motion.section
-            id="home"
-            className="hero-section"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1 }}
-          >
-            <div className="floating-content" ref={floatingRef}>
-              <div className="hero-content">
-                <div className="hero-text">
-                  <motion.h2
-                    ref={heroTitle.ref}
-                    className="hero-title"
-                    initial={{ y: 100, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ duration: 1, ease: "easeOut" }}
-                  >
-                    Education is not the learning of facts, but the training of
-                    the mind to think
-                  </motion.h2>
-                  <motion.p
-                    ref={heroSubtitle.ref}
-                    className="hero-subtitle"
-                    initial={{ x: -100, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
-                  >
-                    Empowering independent learning fueled by senior developers
-                    from leading MNCs. We provide problem statements, foster a
-                    comfortable environment, and track individual progress for
-                    optimal growth.
-                  </motion.p>
-                  <motion.button
-                    ref={heroButton.ref}
-                    className="cta-button btn-2"
-                    onClick={() => scrollToSection("programs")}
-                    initial={{ y: 80, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{
-                      duration: 0.8,
-                      delay: 0.6,
-                      ease: "easeOut",
-                    }}
-                  >
-                    Get Started <FaArrowRight />
-                  </motion.button>
-                </div>
-              </div>
-            </div>
-          </motion.section>
-
-          <section className="stats-section animate-on-scroll">
-            <h2 ref={statsh2Parallax.ref}>Catalysing Your Path to Success</h2>
-            <motion.div
-              ref={statsParallax.ref}
-              className="stats-container"
-              variants={containerVariants}
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true }}
-            >
-              <motion.div
-                className="stat-card"
-                style={{ animationDelay: "0.1s" }}
-                variants={cardVariants}
-              >
-                <div className="stat-icon rotate-on-hover">
-                  <FaChartLine />
-                </div>
-                <br />
-                <span className="count-up" data-target="6">
-                  0
-                </span>
-                <span> LPA</span>
-                <p>Average Dream Job CTC</p>
-              </motion.div>
-
-              <motion.div
-                className="stat-card"
-                style={{ animationDelay: "0.2s" }}
-                variants={cardVariants}
-              >
-                <div className="stat-icon rotate-on-hover">
-                  <FaBriefcase />
-                </div>
-                <br />
-                <span className="count-up" data-target="200">
-                  0
-                </span>
-                <span>+</span>
-                <p>Product Offers</p>
-              </motion.div>
-
-              <motion.div
-                className="stat-card"
-                style={{ animationDelay: "0.3s" }}
-                variants={cardVariants}
-              >
-                <div className="stat-icon rotate-on-hover">
-                  <FaUsers />
-                </div>
-                <br />
-                <span className="count-up" data-target="5000">
-                  0
-                </span>
-                <span>+</span>
-                <p>Job Opportunities</p>
-              </motion.div>
-
-              <motion.div
-                className="stat-card"
-                style={{ animationDelay: "0.4s" }}
-                variants={cardVariants}
-              >
-                <div className="stat-icon rotate-on-hover">
-                  <FaCheckCircle />
-                </div>
-                <br />
-                <span className="count-up" data-target="24">
-                  0
-                </span>
-                <span> LPA</span>
-                <p>Highest Package</p>
-              </motion.div>
-            </motion.div>
-          </section>
-
-          <section id="about" className="about-section">
-            <div className="section-header">
-              <motion.h2
-                ref={cardTitle.ref}
-                initial={{ y: 50, opacity: 0 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={{ duration: 0.9, ease: "easeOut" }}
-              >
-                Blaze A Trail On Our Pathway To Turbocharge Your Tech Career!
-              </motion.h2>
-              <motion.p
-                ref={cardText.ref}
-                initial={{ y: -100, opacity: 0 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={{ duration: 0.9, delay: 0.3, ease: "easeOut" }}
-              >
-                At Better Tomorrow, we immerse budding talents in live
-                industrial projects and real-world problem-solving. We fortify
-                their confidence with a solid foundation in industry essentials.
-                Our commitment drives us, and our unwavering pillars include:
-              </motion.p>
-            </div>
-
-            <div>
-              <About />
-            </div>
-          </section>
-
-          <section id="programs" className="programs-section">
-            <div className="section-header">
-              <motion.h2
-                ref={aboutTitleProgram.ref}
-                initial={{ y: 200, opacity: 0 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={{ duration: 1.2, delay: 0.2, ease: "easeOut" }}
-              >
-                Extensive Programs From Domain Experts That Meets Industry
-                Expectations
-              </motion.h2>
-            </div>
-            <div className="programs-slider">
-              <motion.div
-                className="programs-track"
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{
-                  duration: 0.6,
-                  delay: 0.2,
-                  ease: "easeOut",
+          <div className="programs-readmore">
+            <a href="#about" className="read-more-btn btn-2">
+              Read More{" "}
+              <GoArrowUpRight
+                style={{
+                  marginTop: "1px",
+                  verticalAlign: "middle",
+                  fontWeight: "700",
                 }}
-              >
-                {[...programs, ...programs].map((program, idx) => (
-                  <div key={idx} className="program-card">
-                    <img src={program.img} alt={program.title} />
-                    <h3>{program.title}</h3>
-                    <p>{program.description}</p>
-                  </div>
-                ))}
-              </motion.div>
-            </div>
+              />
+            </a>
+          </div>
+        </section>
 
-            <div className="programs-readmore">
-              <a href="#about" className="read-more-btn btn-2">
-                Read More{" "}
-                <GoArrowUpRight
-                  style={{
-                    marginTop: "1px",
-                    verticalAlign: "middle",
-                    fontWeight: "700",
-                  }}
-                />
-              </a>
-            </div>
-          </section>
+        <section id="achievements" className="achievements-section">
+          <div className="section-header">
+            <h2 ref={Title.ref}>
+              Their Beliefs Made Us So Remarkable On Where We Are Now!
+            </h2>
+            <p ref={Text.ref}>
+              In the below institutions we are doing long run programs not an
+              one or two days events. For detailed event list check our
+              Instagram page.
+            </p>
+          </div>
+          <motion.div
+            className="carousel-wrapper"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.1 }}
+            variants={{
+              hidden: {},
+              visible: {
+                transition: {
+                  staggerChildren: 0.06,
+                  delayChildren: 0.2,
+                },
+              },
+            }}
+          >
+            {colleges.map((college, idx) => {
+              const position = idx - activeIndex;
 
-          <section id="achievements" className="achievements-section">
-            <div className="section-header">
-              <motion.h2
-                ref={Title.ref}
-                initial={{ y: 50, opacity: 0 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={{ duration: 0.9, ease: "easeOut" }}
-              >
-                Their Beliefs Made Us So Remarkable On Where We Are Now!
-              </motion.h2>
-              <motion.p
-                ref={Text.ref}
-                initial={{ y: -100, opacity: 0 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={{ duration: 0.9, delay: 0.3, ease: "easeOut" }}
-              >
-                In the below institutions we are doing long run programs not an
-                one or two days events. For detailed event list check our
-                Instagram page.
-              </motion.p>
-            </div>
-            <div className="carousel-wrapper">
-              {colleges.map((college, idx) => {
-                const position = idx - activeIndex;
-
-                return (
-                  <motion.div
-                    key={idx}
-                    className={`carousel-card ${position === 0 ? "carousel-card--active" : ""}`}
-                    onClick={() => setActiveIndex(idx)}
-                    initial={{
-                      x: 0,
-                      scale: 0.5,
+              return (
+                <motion.div
+                  key={idx}
+                  className={`carousel-card ${position === 0 ? "carousel-card--active" : ""}`}
+                  onClick={() => setActiveIndex(idx)}
+                  variants={{
+                    hidden: {
+                      x: position * 260,
+                      scale: 0.88,
                       opacity: 0,
-                      borderRadius: "100px",
-                    }}
-                    whileInView={{
+                      borderRadius: "50px",
+                    },
+                    visible: {
                       x: position * 260,
                       scale: position === 0 ? 1 : 0.8,
-                      rotateY: position * -15,
+                      rotateY: position * -10,
                       transformPerspective: 1000,
                       opacity: Math.abs(position) > 2 ? 0 : 1,
                       filter: position === 0 ? "blur(0px)" : "blur(1.5px)",
                       borderRadius: position === 0 ? "20px" : "40px",
                       zIndex: 10 - Math.abs(position),
-                    }}
-                    viewport={{ once: true, amount: 0.4 }}
-                    transition={{
-                      type: "spring",
-                      stiffness: 500,
-                      damping: 10,
-                      mass: 0.1,
-                      delay: idx * 0.1,
-                    }}
-                    style={{
-                      backgroundImage: `url(${college.image})`,
-                      backgroundSize: "cover",
-                      backgroundPosition: "center",
-                      backgroundRepeat: "no-repeat",
-                    }}
+                      transition: {
+                        duration: 1.2,
+                        ease: [0.16, 1, 0.3, 1],
+                      },
+                    },
+                  }}
+                  style={{
+                    backgroundImage: `url(${college.image})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    backgroundRepeat: "no-repeat",
+                  }}
+                >
+                  <div
+                    style={{ padding: "0px" }}
+                    className="carousel-card-content"
                   >
-                    <div
-                      style={{ padding: "0px" }}
-                      className="carousel-card-content"
-                    >
-                      <span className="card-number">
-                        {idx + 1} / {colleges.length}
-                      </span>
-                      <div className="college-header">
-                        <img
-                          src={college.logo}
-                          alt={college.name}
-                          className="college-logo"
-                        />
-                        <h3>{college.name}</h3>
-                      </div>
-
-                      {position === 0 && (
-                        <>
-                          <p className="program-text">{college.program}</p>
-                          <a
-                            href={college.link}
-                            className="more-btn"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            View More →
-                          </a>
-                        </>
-                      )}
+                    <span className="card-number">
+                      {idx + 1} / {colleges.length}
+                    </span>
+                    <div className="college-header">
+                      <img
+                        src={college.logo}
+                        alt={college.name}
+                        className="college-logo"
+                      />
+                      <h3>{college.name}</h3>
                     </div>
-                  </motion.div>
-                );
-              })}
-            </div>
 
-            <motion.div
-              className="testimonial-section"
-              initial={{ opacity: 0, y: 60 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.4 }}
-              transition={{ duration: 1, ease: "easeOut" }}
-            >
+                    {position === 0 && (
+                      <>
+                        <p className="program-text">{college.program}</p>
+                        <a
+                          href={college.link}
+                          className="more-btn"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          View More →
+                        </a>
+                      </>
+                    )}
+                  </div>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+
+       
+
+          <motion.div
+            className="testimonial-section"
+            initial={{ opacity: 0, y: 60 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.4 }}
+            transition={{ duration: 1, ease: "easeOut" }}
+          >
+            <div className="ts-sub-container">
               <h3>Our Commitment Towards Mentorship Makes Us Unique</h3>
-              <p>Learning in Action than thinking about it</p>
-            </motion.div>
-          </section>
-
-          <section id="placements" className="placements-section-wrapper">
-            <div className="section-header">
-              <motion.h2
-                ref={aboutTitle.ref}
-                initial={{ y: 50, opacity: 0 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={{ duration: 0.9, ease: "easeOut" }}
-              >
-                Our Graduates Pathway To Success
-              </motion.h2>
-              <motion.p
-                ref={aboutText.ref}
-                initial={{ y: -100, opacity: 0 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={{ duration: 0.9, delay: 0.3, ease: "easeOut" }}
-              >
-                Full Stack Web Development Using MERN Stack In 15 Days -
-                Students Momentous Transformations
-              </motion.p>
-            </div>
-            <div className="placements-wrapper">
-              <StudentPlacements />
-            </div>
-          </section>
-
-          <TransformationSection isLight={isLight} />
-
-          <footer className="footer">
-            <h3>Better Tomorrow</h3>
-            <div className="footer-content">
-              <div className="footer-column">
-                <div className="footer-links">
-                  <h4>Reach us</h4>
-                  <p>+91 9750503595</p>
-                  <p>+91 8300287195</p>
-                  <p>training@thebettertomorrow.in</p>
-                </div>
-              </div>
-
-              <div className="footer-column">
-                <h4>Company</h4>
-                <a href="#about">About</a>
-                <a href="#achievements">Achievements</a>
-                <a href="#placements">Placement Status</a>
-              </div>
-
-              <div className="footer-column">
-                <h4>Support</h4>
-                <a href="#">Forums</a>
-                <a href="#">JS Documentations</a>
-                <a href="#">Quiz</a>
-              </div>
-
-              <div className="footer-column">
-                <h4>Quick Links</h4>
-                <a href="#">React JS</a>
-                <a href="#">Node JS</a>
-                <a href="#">Javascript</a>
-                <a href="#">Feedback</a>
-              </div>
-
-              <div className="footer-column newsletter">
-                <h4>JOIN OUR COMMUNITY</h4>
-                <p>Will send you job updates and our community news</p>
-                <div className="newsletter-form ">
-                  <input type="email" placeholder="Your email" />
-                  <button className="btn-2">Subscribe</button>
-                </div>
-              </div>
-            </div>
-
-            <div className="footer-bottom">
-              <p>
-                © 2025 Better Tomorrow Training Institute. All rights reserved.
+              <p className="ts-sub">
+                Learning in Action than thinking about it
               </p>
             </div>
-          </footer>
-        </main>
-      ) : (
-        <RoadMap />
-      )}
+
+            <div className="ts-features">
+              {[
+                {
+                  type: "guidance",
+                  title: "Personalized Guidance",
+                  desc: "Every student gets dedicated attention from senior developers.",
+                  delay: 0,
+                },
+                {
+                  type: "industry",
+                  title: "Real Industry Project Experience",
+                  desc: "Work on live, production-grade projects that mirror what top MNCs actually build.",
+                  delay: 0.15,
+                },
+                {
+                  type: "interview",
+                  title: "Interview & Placement Prep",
+                  desc: "360° coaching — DSA, system design, aptitude, and confidence building to crack your dream company.",
+                  delay: 0.3,
+                },
+                {
+                  type: "progress",
+                  title: "Progress Tracking & Feedback",
+                  desc: "Continuous, structured feedback loops so your growth is always measurable and visible.",
+                  delay: 0.45,
+                },
+              ].map((f, i) => (
+                <motion.div
+                  key={i}
+                  className="ts-feature-card"
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.3 }}
+                  transition={{
+                    duration: 0.7,
+                    delay: f.delay,
+                    ease: "easeOut",
+                  }}
+                  whileHover={{ y: -6, scale: 1.03 }}
+                >
+                  <div className="ts-feature-icon">
+                    <FeatureIcon type={f.type} />
+                  </div>
+                  <h4>{f.title}</h4>
+                  <p>{f.desc}</p>
+                  <div className="ts-feature-glow" />
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        </section>
+
+        <section id="placements" className="placements-section-wrapper">
+          <div className="section-header">
+            <h2 ref={aboutTitle.ref}>Our Graduates Pathway To Success</h2>
+            <p ref={aboutText.ref}>
+              Full Stack Web Development Using MERN Stack In 15 Days - Students
+              Momentous Transformations
+            </p>
+          </div>
+          <div className="placements-wrapper">
+            <StudentPlacements />
+          </div>
+        </section>
+
+        <TransformationSection isLight={isLight} />
+
+        <Footer />
+      </motion.main>
     </div>
   );
 }
