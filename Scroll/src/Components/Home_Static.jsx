@@ -91,7 +91,7 @@ function Home() {
       link: "https://kongu.ac.in/",
     },
     {
-      name: "M. Kumarasamy College Of Engineering, Karur",
+      name: "M. Kumarasamy College of Engineering, Karur",
       program: "Programming expertise in Java",
       image: clgimg7,
       logo: logo4,
