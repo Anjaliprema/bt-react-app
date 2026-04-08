@@ -7,7 +7,7 @@ import About_Us from "./Components/About_Us";
 import Placement from "./Components/Placement";
 import Contact_Us from "./Components/Contact_Us";
 import EnrollPage from "./Components/EnrollPage";
-
+import Student from "./Components/Student";
 function App() {
   return (
     <ParallaxProvider>
@@ -19,6 +19,7 @@ function App() {
         <Route path="/Placement" element={<Placement />} />
         <Route path="/Contact_us" element={<Contact_Us />} />
         <Route path="/enroll" element={<EnrollPage />} />
+        <Route path="/student" element={<Student />} />
       </Routes>
     </ParallaxProvider>
   );
