@@ -169,7 +169,6 @@ export default function EnrollPage() {
         </motion.div>
       </div>
 
-      {/* Form card */}
       <div style={{
         maxWidth: 620,
         marginInline: "auto",

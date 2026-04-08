@@ -64,18 +64,19 @@ export default function Header() {
   const isAbout = location.pathname === "/About_us";
   const isPlacement = location.pathname === "/Placement";
   const isContact = location.pathname === "/Contact_us";
+  const isStudent = location.pathname === "/student";
 
   const navLinkStyle = (isActive) => ({
     cursor: "pointer",
     fontSize: "14px",
     textDecoration: "none",
     fontWeight: isActive ? "700" : "500",
-    padding: "9px 18px",
+    padding: "8px 14px",
     borderRadius: "30px",
     transition: "color 0.2s ease, background 0.2s ease",
     display: "inline-flex",
     alignItems: "center",
-    gap: "6px",
+    gap: "4px",
     color: isActive
       ? isLight
         ? "#053859"
@@ -172,6 +173,15 @@ export default function Header() {
           </a>
 
           <a
+            onClick={() => navigate("/student")}
+            style={navLinkStyle(isStudent)}
+            onMouseEnter={(e) => navLinkHover(e, isStudent, isLight)}
+            onMouseLeave={(e) => navLinkLeave(e, isStudent, isLight)}
+          >
+            Student
+          </a>
+
+          <a
             onClick={() => navigate("/About_us")}
             style={navLinkStyle(isAbout)}
             onMouseEnter={(e) => navLinkHover(e, isAbout, isLight)}
@@ -263,6 +273,11 @@ export default function Header() {
               label: "Road Map",
               isActive: isRoadmap,
               action: () => navigate("/Roadmap"),
+            },
+            {
+              label: "Student",
+              isActive: isStudent,
+              action: () => navigate("/student"),
             },
             {
               label: "About Us",
