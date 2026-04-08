@@ -630,7 +630,7 @@ function Student() {
     return activeFilter === 'all' || cat === activeFilter || cat === 'all';
   };
 
-  const bg = isLight ? "#f7f6f2" : "#0a0a0a";
+  const bg = isLight ? "#ffffff" : "#0a0a0a";
   const textColor = isLight ? "#373738" : "#f0f0f0";
 
   // Card refs for magnetic effect
@@ -671,7 +671,7 @@ function Student() {
               Journal
             </div>
             <h1 className="main-title">
-              Luminary<br/><em>Journal</em> Blog
+               Blog
             </h1>
           </div>
           <div className="header-right">
@@ -747,8 +747,8 @@ function Student() {
           <TopicCard
             id="topic1"
             visible={visibleCards.has('topic1') && isCardVisible('web')}
-            bgGradient="linear-gradient(135deg,#fef9c3,#fde68a)"
-            iconColor="#92400e"
+            bgGradient="var(--topic-grad-primary)"
+            iconColor="var(--accent)"
             icon="JS"
             iconStyle={{ fontFamily: "'DM Mono',monospace", fontSize: '36px' }}
             badge="30 DAYS"
@@ -756,7 +756,7 @@ function Student() {
             title="Complete Javascript in 30 Days — The Definitive Guide"
             meta="June 15, 2024 · 8 min read"
             progress={72}
-            progressColor="#1a56db"
+            progressColor="var(--accent)"
             onCursorExpand={handleCursorExpand}
             cardRef={getCardRef('topic1')}
             onMouseMove={handleCardMouseMove}
@@ -767,15 +767,15 @@ function Student() {
           <TopicCard
             id="topic2"
             visible={visibleCards.has('topic2') && isCardVisible('interview')}
-            bgGradient="linear-gradient(135deg,#f0fdf4,#bbf7d0)"
-            iconColor="#065f46"
+            bgGradient="var(--topic-grad-secondary)"
+            iconColor="var(--accent-alt)"
             icon="Z"
             iconStyle={{ fontSize: '42px', fontFamily: "'Playfair Display',serif" }}
             tag={{ class: 'tag-green', text: 'Interview' }}
             title="Cracking Interviews at Zoho — Insider Tips"
             meta="May 18, 2024 · 7 min read"
             progress={58}
-            progressColor="#059669"
+            progressColor="var(--accent-alt)"
             onCursorExpand={handleCursorExpand}
             cardRef={getCardRef('topic2')}
             onMouseMove={handleCardMouseMove}
@@ -786,15 +786,15 @@ function Student() {
           <TopicCard
             id="topic3"
             visible={visibleCards.has('topic3') && isCardVisible('interview')}
-            bgGradient="linear-gradient(135deg,#ede9fe,#c4b5fd)"
-            iconColor="#4c1d95"
+            bgGradient="var(--topic-grad-muted)"
+            iconColor="var(--ink2)"
             icon={<>Product<br/>Hunt</>}
             iconStyle={{ fontSize: '28px', fontFamily: "'Playfair Display',serif", textAlign: 'center', lineHeight: 1.15 }}
             tag={{ class: 'tag-purple', text: 'Interview' }}
             title="How to Crack Product-Based Companies"
             meta="July 20, 2022 · 6 min read"
             progress={45}
-            progressColor="#7c3aed"
+            progressColor="var(--accent)"
             onCursorExpand={handleCursorExpand}
             cardRef={getCardRef('topic3')}
             onMouseMove={handleCardMouseMove}
@@ -811,7 +811,7 @@ function Student() {
             title="Roadmap for DevOps — Complete Beginner's Guide"
             meta="September 7, 2024 · 10 min read"
             barFill={80}
-            barColor="#c1121f"
+            barColor="var(--accent)"
             views="2.9k"
             onCursorExpand={handleCursorExpand}
             cardRef={getCardRef('wide1')}
@@ -827,7 +827,7 @@ function Student() {
             title="Web Developer vs Web Designer — Know the Difference"
             meta="December 12, 2023 · 6 min read"
             barFill={55}
-            barColor="#1a56db"
+            barColor="var(--accent-alt)"
             views="1.8k"
             onCursorExpand={handleCursorExpand}
             cardRef={getCardRef('wide2')}
@@ -844,7 +844,7 @@ function Student() {
             title="MERN Stack Developer — Interview Roadmap & DSA Prep"
             meta="Aug 23, 2022 · 4 min read"
             barFill={70}
-            barColor="#d97706"
+            barColor="var(--ink2)"
             views="3.2k"
             onCursorExpand={handleCursorExpand}
             cardRef={getCardRef('wide3')}
@@ -863,13 +863,13 @@ function Student() {
           />
 
           {/* Newsletter Card */}
-          <NewsletterCard
+          {/* <NewsletterCard
             visible={visibleCards.has('newsletter') && isCardVisible('all')}
             onCursorExpand={handleCursorExpand}
             cardRef={getCardRef('newsletter')}
             onMouseMove={handleCardMouseMove}
             onMouseLeave={handleCardMouseLeave}
-          />
+          /> */}
         </div>
 
         {/* Pagination Dots */}
@@ -925,11 +925,11 @@ function FeaturedCard({ visible, onCursorExpand, cardRef, onMouseMove, onMouseLe
         <div className="code-glow"></div>
         <div className="feat-img-inner">
           <div className="code-block">
-            <div><span style={{color:'#f472b6'}}>const</span> <span style={{color:'#60a5fa'}}>stack</span> = [<span style={{color:'#fb923c'}}>'M'</span>,<span style={{color:'#fb923c'}}>'E'</span>,<span style={{color:'#fb923c'}}>'R'</span>,<span style={{color:'#fb923c'}}>'N'</span>]</div>
-            <div><span style={{color:'#4ade80'}}>stack.forEach</span>(s =&gt; <span style={{color:'#e879f9'}}>learn</span>(s))</div>
-            <div style={{color:'#94a3b8'}}><span style={{color:'#94a3b8'}}>// your roadmap starts here</span></div>
-            <div><span style={{color:'#f472b6'}}>async function</span> <span style={{color:'#60a5fa'}}>master</span>() {'{'}</div>
-            <div style={{paddingLeft:'1em'}}><span style={{color:'#fb923c'}}>await</span> <span style={{color:'#4ade80'}}>practice</span>(<span style={{color:'#e879f9'}}>daily</span>)</div>
+            <div><span style={{color:'var(--accent)'}}>const</span> <span style={{color:'var(--panel-muted-strong)'}}>stack</span> = [<span style={{color:'var(--accent-alt)'}}>'M'</span>,<span style={{color:'var(--accent-alt)'}}>'E'</span>,<span style={{color:'var(--accent-alt)'}}>'R'</span>,<span style={{color:'var(--accent-alt)'}}>'N'</span>]</div>
+            <div><span style={{color:'var(--panel-muted-strong)'}}>stack.forEach</span>(s =&gt; <span style={{color:'var(--accent)'}}>learn</span>(s))</div>
+            <div style={{color:'var(--panel-muted)'}}><span style={{color:'var(--panel-muted)'}}>// your roadmap starts here</span></div>
+            <div><span style={{color:'var(--accent)'}}>async function</span> <span style={{color:'var(--panel-muted-strong)'}}>master</span>() {'{'}</div>
+            <div style={{paddingLeft:'1em'}}><span style={{color:'var(--accent-alt)'}}>await</span> <span style={{color:'var(--panel-muted-strong)'}}>practice</span>(<span style={{color:'var(--accent)'}}>daily</span>)</div>
             <div>{'}'}</div>
           </div>
         </div>
@@ -1009,10 +1009,10 @@ function StatsCard({ visible, onCursorExpand, cardRef, onMouseMove, onMouseLeave
         <div className="stats-title">Numbers that<br/>tell our story</div>
       </div>
       <div className="stats-grid">
-        <StatItem num={counts.articles} label="Articles" color="#e63946" fill={visible ? 85 : 0} />
-        <StatItem num={counts.authors} label="Authors" color="#2a9d8f" fill={visible ? 60 : 0} />
-        <StatItem num={counts.readers} label="k Readers" color="#f4a261" fill={visible ? 95 : 0} />
-        <StatItem num={counts.rating} label="Avg. Rating" color="#7c3aed" fill={visible ? 98 : 0} />
+        <StatItem num={counts.articles} label="Articles" color="var(--accent)" fill={visible ? 85 : 0} />
+        <StatItem num={counts.authors} label="Authors" color="var(--accent-alt)" fill={visible ? 60 : 0} />
+        <StatItem num={counts.readers} label="k Readers" color="var(--panel-muted-strong)" fill={visible ? 95 : 0} />
+        <StatItem num={counts.rating} label="Avg. Rating" color="var(--panel-contrast)" fill={visible ? 98 : 0} />
       </div>
       <div className="stats-footer">
         <span className="stats-cta">Updated daily</span>
@@ -1059,7 +1059,7 @@ function TopicCard({
         {badge && (
           <div style={{ 
             position: 'absolute', bottom: '8px', right: '10px', 
-            fontSize: '9px', fontWeight: 700, color: '#78350f',
+            fontSize: '9px', fontWeight: 700, color: 'var(--badge-text-strong)',
             letterSpacing: '.1em', fontFamily: "'DM Mono',monospace"
           }}>{badge}</div>
         )}
@@ -1200,7 +1200,7 @@ function NewsletterCard({ visible, onCursorExpand, cardRef, onMouseMove, onMouse
           opacity: 0.6, top: '-8px', right: '-4px', animationDelay: '.5s' 
         }}/>
         <div className="floating-dot" style={{ 
-          width: '6px', height: '6px', background: '#f4a261', 
+          width: '6px', height: '6px', background: 'var(--accent-alt)', 
           opacity: 0.5, bottom: '-4px', left: '8px', animationDelay: '1.2s' 
         }}/>
         <div className="nl-badge">
