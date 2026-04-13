@@ -408,6 +408,9 @@ export default function Student() {
 
   const themeClass = isLight ? "light-theme" : "dark-theme";
   const bg = isLight ? "#ffffff" : "#0a0a0a";
+  const themeGradient = isLight
+    ? "linear-gradient(135deg, #053759, #0a5c8fa8)"
+    : "linear-gradient(135deg, #f7c651, #e0a419)";
 
   const trendLinks = {
     1: "https://workat.tech/fullstack-development/article/fullstack-development-roadmap-mern-stack-8eqh1qepx6md",
@@ -643,7 +646,11 @@ export default function Student() {
               href="https://thebettertomorrow.in/LRP"
               target="_blank"
               rel="noopener noreferrer"
-              className="feed-btn"
+              className="feed-btn op-btn-primary btn-2"
+              style={{
+                background: themeGradient,
+                color: isLight ? "#fff" : "#000",
+              }}
               onMouseEnter={cExpand}
               onMouseLeave={cShrink}
             >
