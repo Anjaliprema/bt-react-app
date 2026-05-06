@@ -2108,13 +2108,10 @@ body {
     margin 0.3s;
 }
 .rm-card.open .rm-card-links {
-  max-height: 400px;
+  max-height: 2000px;
   opacity: 1;
   margin-top: 9px;
 }
-
-
-
 
 
 .rm-roles-section {
@@ -5523,11 +5520,11 @@ transition: background .3s, transform .3s cubic-bezier(.4,0,.2,1), box-shadow .3
   gap: 18px;
   transition: transform 0.5s cubic-bezier(.4,0,.2,1);
 }
-.rm-card:hover { 
+.rm-carousel-track .rm-card:hover { 
   transform: translateY(-8px); 
   border-color: var(--accent); 
 }
-.rm-card {
+.rm-carousel-track .rm-card {
   min-width: calc(25% - 14px);
   max-width: calc(25% - 14px);
   background: var(--card-bg);
@@ -5571,7 +5568,7 @@ transition: background .3s, transform .3s cubic-bezier(.4,0,.2,1), box-shadow .3
   justify-content: space-between; 
   flex: 1; 
 }
-.rm-card-title { 
+.rm-carousel-track .rm-card-title { 
   font-size: 13.5px; 
   font-weight: 700; 
   line-height: 1.45; 
@@ -5579,7 +5576,7 @@ transition: background .3s, transform .3s cubic-bezier(.4,0,.2,1), box-shadow .3
   margin-bottom: 12px; 
   transition: color .22s; 
 }
-.rm-card:hover .rm-card-title { 
+.rm-carousel-track .rm-card:hover .rm-card-title { 
   color: var(--accent); 
 }
 .rm-card-foot { 
