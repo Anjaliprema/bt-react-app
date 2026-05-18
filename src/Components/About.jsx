@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
 import "./About.css";
 import about1 from "../assets/about1.png";
 import about2 from "../assets/about2.png";
@@ -36,17 +35,35 @@ const ENTRY_FROM = [
 ];
 
 const BASE_ANGLES = [270, 30, 150];
-const ORBIT_R = 130;
-const IMG_SIZE = 90;
+const TRIGGER_ANGLE = 360;
+const activeNodeRef = { current: null };
 
-function OrbitLines({ rotation, activeId }) {
-  const center = ORBIT_R + IMG_SIZE / 2;
+function getClosestNodeId(rotation) {
+  let minDiff = Infinity;
+  let closestId = activeNodeRef.current ?? 0;
+  BASE_ANGLES.forEach((base, i) => {
+    const normalized = (((base + rotation) % 360) + 360) % 360;
+    let diff = Math.abs(normalized - TRIGGER_ANGLE);
+    if (diff > 180) diff = 360 - diff;
+    if (diff < 20 && diff < minDiff) {
+      minDiff = diff;
+      closestId = PILLARS[i].id;
+    }
+  });
+  activeNodeRef.current = closestId;
+  return closestId;
+}
+
+function OrbitLines({ rotation, activeId, orbitR, imgSize }) {
+  if (!orbitR || !imgSize || isNaN(orbitR) || isNaN(imgSize)) return null;
+
+  const center = orbitR + imgSize / 2;
 
   const points = BASE_ANGLES.map((base) => {
     const rad = ((base + rotation) * Math.PI) / 180;
     return {
-      x: center + Math.cos(rad) * ORBIT_R,
-      y: center + Math.sin(rad) * ORBIT_R,
+      x: center + Math.cos(rad) * orbitR,
+      y: center + Math.sin(rad) * orbitR,
     };
   });
 
@@ -55,7 +72,7 @@ function OrbitLines({ rotation, activeId }) {
       <circle
         cx={center}
         cy={center}
-        r={ORBIT_R}
+        r={orbitR}
         fill="none"
         stroke="var(--orbit-border)"
         strokeWidth={1}
@@ -102,120 +119,180 @@ function OrbitLines({ rotation, activeId }) {
 }
 
 function About() {
+  const getOrbitR = () =>
+    typeof window !== "undefined" && window.innerWidth <= 768 ? 75 : 130;
+  const getImgSize = () =>
+    typeof window !== "undefined" && window.innerWidth <= 768 ? 52 : 90;
+
+  const [orbitR, setOrbitR] = useState(getOrbitR);
+  const [imgSize, setImgSize] = useState(getImgSize);
+
+  useEffect(() => {
+    const onResize = () => {
+      setOrbitR(getOrbitR());
+      setImgSize(getImgSize());
+    };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  const canvasSize = orbitR * 2 + imgSize;
+
   const [entered, setEntered] = useState(false);
   const [hintVisible, setHintVisible] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [activeId, setActiveId] = useState(null);
+  const [manualId, setManualId] = useState(null);
   const [cardVisible, setCardVisible] = useState(false);
+  const [inView, setInView] = useState(false);
 
+  const sectionRef = useRef(null);
   const rafRef = useRef(null);
   const startRef = useRef(null);
+  const tickRef = useRef(null);
   const SPEED = 0.025;
 
+  tickRef.current = (ts) => {
+    if (!startRef.current) startRef.current = ts;
+    const newRotation = (ts - startRef.current) * SPEED;
+    setRotation(newRotation);
+    setManualId((prev) => {
+      if (prev === null) {
+        const closest = getClosestNodeId(newRotation);
+        setActiveId(closest);
+      }
+      return prev;
+    });
+    rafRef.current = requestAnimationFrame((t) => tickRef.current(t));
+  };
+
   useEffect(() => {
-    const t = setTimeout(() => setEntered(true), 120);
-    return () => clearTimeout(t);
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !inView) setInView(true);
+      },
+      { threshold: 0.4 },
+    );
+    if (sectionRef.current) observer.observe(sectionRef.current);
+    return () => observer.disconnect();
   }, []);
 
   useEffect(() => {
-    if (entered) {
-      const t = setTimeout(() => setHintVisible(true), 900);
-      return () => clearTimeout(t);
-    }
-  }, [entered]);
+    if (!inView) return;
+    const t = setTimeout(() => setEntered(true), 120);
+    return () => clearTimeout(t);
+  }, [inView]);
 
   useEffect(() => {
-    const tick = (ts) => {
-      if (!startRef.current) startRef.current = ts;
-      setRotation((ts - startRef.current) * SPEED);
-      rafRef.current = requestAnimationFrame(tick);
-    };
+    if (!inView) return;
+    const t = setTimeout(() => setHintVisible(true), 700);
+    return () => clearTimeout(t);
+  }, [inView]);
+
+  useEffect(() => {
+    if (!inView) return;
+    startRef.current = null;
     const delay = setTimeout(() => {
-      rafRef.current = requestAnimationFrame(tick);
-    }, 1300);
+      rafRef.current = requestAnimationFrame((t) => tickRef.current(t));
+    }, 3200);
     return () => {
       clearTimeout(delay);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
-  }, []);
+  }, [inView]);
 
   useEffect(() => {
     if (activeId !== null) {
       setCardVisible(false);
-      const t = setTimeout(() => setCardVisible(true), 90);
+      const t = setTimeout(() => setCardVisible(true), 600);
       return () => clearTimeout(t);
     } else {
       setCardVisible(false);
     }
   }, [activeId]);
 
-  const handleNodeClick = (id) =>
-    setActiveId((prev) => (prev === id ? null : id));
+  useEffect(() => {
+    if (manualId !== null) {
+      const t = setTimeout(() => setManualId(null), 4000);
+      return () => clearTimeout(t);
+    }
+  }, [manualId]);
+
+  const handleNodeClick = (id) => {
+    setManualId((prev) => {
+      if (prev === id) {
+        setActiveId(getClosestNodeId(rotation));
+        return null;
+      }
+      setActiveId(id);
+      return id;
+    });
+  };
 
   const activeCard = PILLARS.find((p) => p.id === activeId) ?? null;
-  const canvasSize = ORBIT_R * 2 + IMG_SIZE;
 
   return (
-    <section id="about" className="about-section">
+    <section id="about" className="about-section" ref={sectionRef}>
       <div className="pillars-orbit-wrapper">
-        <motion.div
-          className="orbit-canvas"
-          style={{ width: canvasSize, height: canvasSize }}
-          initial={{ x: -200, opacity: 0 }}
-          whileInView={{ x: 0, opacity: 1 }}
-          viewport={{ once: true, amount: 0.6 }}
-          transition={{ duration: 1.2, ease: "easeOut" }}
+        <div
+          className={`orbit-canvas-wrapper${inView ? " orbit-canvas-wrapper--entered" : ""}`}
         >
-          <svg
-            className="orbit-svg"
-            viewBox={`0 0 ${canvasSize} ${canvasSize}`}
-            xmlns="http://www.w3.org/2000/svg"
+          <div
+            className="orbit-canvas"
+            style={{ width: canvasSize, height: canvasSize }}
           >
-            <OrbitLines rotation={rotation} activeId={activeId} />
-          </svg>
+            <svg
+              className="orbit-svg"
+              viewBox={`0 0 ${canvasSize} ${canvasSize}`}
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <OrbitLines
+                rotation={rotation}
+                activeId={activeId}
+                orbitR={orbitR}
+                imgSize={imgSize}
+              />
+            </svg>
 
-          {PILLARS.map((pillar, i) => {
-            const angleDeg = BASE_ANGLES[i] + rotation;
-            const angleRad = (angleDeg * Math.PI) / 180;
-            const cx = ORBIT_R + IMG_SIZE / 2 + Math.cos(angleRad) * ORBIT_R;
-            const cy = ORBIT_R + IMG_SIZE / 2 + Math.sin(angleRad) * ORBIT_R;
-            const isActive = activeId === pillar.id;
+            {PILLARS.map((pillar, i) => {
+              const angleDeg = BASE_ANGLES[i] + rotation;
+              const angleRad = (angleDeg * Math.PI) / 180;
+              const cx = orbitR + imgSize / 2 + Math.cos(angleRad) * orbitR;
+              const cy = orbitR + imgSize / 2 + Math.sin(angleRad) * orbitR;
+              const isActive = activeId === pillar.id;
 
-            return (
-              <button
-                key={pillar.id}
-                className={`orbit-node${isActive ? " orbit-node--active" : ""}`}
-                style={{
-                  left: cx - IMG_SIZE / 2,
-                  top: cy - IMG_SIZE / 2,
-                  width: IMG_SIZE,
-                  height: IMG_SIZE,
-                  transform: entered
-                    ? "translate(0, 0)"
-                    : `translate(${ENTRY_FROM[i].x}, ${ENTRY_FROM[i].y})`,
-                  opacity: entered ? 1 : 0,
-                  transitionDelay: entered ? "0s" : `${i * 0.15}s`,
-                }}
-                aria-label={pillar.label}
-                onClick={() => handleNodeClick(pillar.id)}
-              >
-                <img src={pillar.src} alt={pillar.label} draggable={false} />
-                <span className="orbit-node__ring" aria-hidden="true" />
-                <span className="orbit-node__label">{pillar.label}</span>
-              </button>
-            );
-          })}
+              return (
+                <button
+                  key={pillar.id}
+                  className={`orbit-node${isActive ? " orbit-node--active" : ""}`}
+                  style={{
+                    left: cx - imgSize / 2,
+                    top: cy - imgSize / 2,
+                    width: imgSize,
+                    height: imgSize,
+                    transform: entered
+                      ? "translate(0, 0)"
+                      : `translate(${ENTRY_FROM[i].x}, ${ENTRY_FROM[i].y})`,
+                    opacity: entered ? 1 : 0,
+                    transitionDelay: entered ? "0s" : `${i * 0.15}s`,
+                  }}
+                  aria-label={pillar.label}
+                  onClick={() => handleNodeClick(pillar.id)}
+                >
+                  <img src={pillar.src} alt={pillar.label} draggable={false} />
+                  <span className="orbit-node__ring" aria-hidden="true" />
+                  <span className="orbit-node__label">{pillar.label}</span>
+                </button>
+              );
+            })}
 
-          <span className="orbit-center-dot" aria-hidden="true" />
-        </motion.div>
+            <span className="orbit-center-dot" aria-hidden="true" />
+          </div>
+        </div>
 
-        <motion.div
-          className="pillar-card-panel-outer"
+        <div
+          className={`pillar-card-panel-outer${inView ? " pillar-panel--entered" : ""}`}
           aria-live="polite"
-          initial={{ x: 200, opacity: 0 }}
-          whileInView={{ x: 0, opacity: 1 }}
-          viewport={{ once: true, amount: 0.6 }}
-          transition={{ duration: 1.2, ease: "easeOut", delay: 0.2 }}
         >
           <div
             className={[
@@ -231,7 +308,6 @@ function About() {
               <span className="hint-arrow hint-arrow--d1">←</span>
               <span className="hint-arrow hint-arrow--d2">←</span>
             </div>
-
             <div className="hint-icon">
               <svg
                 width="34"
@@ -246,10 +322,8 @@ function About() {
                 <path d="M12 8v4M12 16h.01" strokeLinecap="round" />
               </svg>
             </div>
-
             <p className="hint-title">Click any image</p>
             <p className="hint-sub">to explore its details</p>
-
             <div className="hint-dots">
               {PILLARS.map((p) => (
                 <span key={p.id} className="hint-dot" />
@@ -264,13 +338,12 @@ function About() {
           >
             {activeCard && (
               <div className="pillar-card">
-                <img src={activeCard.src} alt={activeCard.title} />
-                <h3>{activeCard.title}</h3>
-                <p>{activeCard.body}</p>
+                <h3 className="pillar-card__title">{activeCard.title}</h3>
+                <p className="pillar-card__body">{activeCard.body}</p>
               </div>
             )}
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

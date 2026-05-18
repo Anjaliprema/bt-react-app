@@ -312,8 +312,6 @@ function PhiloItem({ topic, index, total, pageRef, isDark }) {
     t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   const ep = ease(Math.min(prog * 1.5, 1));
 
-
-
   if (isMobile) {
     return (
       <div
@@ -344,7 +342,7 @@ function PhiloItem({ topic, index, total, pageRef, isDark }) {
             alt={topic.title}
             style={{
               width: "100%",
-              height: "140%", 
+              height: "140%",
               objectFit: "cover",
               display: "block",
               transform: `translateY(${(1 - ep) * -30}%)`,
@@ -589,7 +587,6 @@ function PhiloItem({ topic, index, total, pageRef, isDark }) {
     </div>
   );
 }
-
 
 const STATS = [
   { end: 5, suffix: "k+", label: "Students Benefited" },
@@ -1395,7 +1392,6 @@ export default function About_Us() {
         </div>
         <div
           style={{
-            
             position: "relative",
             height:
               typeof window !== "undefined" && window.innerWidth <= 768

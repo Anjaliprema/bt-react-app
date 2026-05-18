@@ -1867,13 +1867,28 @@ const DATA = {
 };
 
 const VW = 760;
-const STEP_H = 210;
 const PAD_T = 60;
 const PAD_B = 80;
-const LEFT_X = 140;
-const RIGHT_X = 620;
 const MID_X = VW / 2;
 const ROAD_W = 46;
+
+
+function getPathDims() {
+  if (typeof window === "undefined") {
+    return { LEFT_X: 140, RIGHT_X: 620, STEP_H: 210, CARD_W: 260 };
+  }
+  const w = window.innerWidth;
+  if (w < 360) return { LEFT_X: 230, RIGHT_X: 530, STEP_H: 175, CARD_W: 72 };
+  if (w < 420) return { LEFT_X: 220, RIGHT_X: 540, STEP_H: 175, CARD_W: 82 };
+  if (w < 480) return { LEFT_X: 210, RIGHT_X: 550, STEP_H: 175, CARD_W: 95 };
+  if (w < 600) return { LEFT_X: 180, RIGHT_X: 580, STEP_H: 185, CARD_W: 100 };
+  if (w < 750) return { LEFT_X: 160, RIGHT_X: 600, STEP_H: 195, CARD_W: 155 };
+  if (w < 900) return { LEFT_X: 150, RIGHT_X: 610, STEP_H: 200, CARD_W: 175 };
+  if (w < 970) return { LEFT_X: 200, RIGHT_X: 620, STEP_H: 205, CARD_W: 175 };
+  if (w < 1066) return { LEFT_X: 140, RIGHT_X: 620, STEP_H: 205, CARD_W: 210 };
+  return { LEFT_X: 140, RIGHT_X: 620, STEP_H: 210, CARD_W: 260 };
+}
+
 
 const PIN_OPEN_ZONE = 55;
 const PIN_CLOSE_ZONE = 200;
@@ -1882,7 +1897,8 @@ const LERP = 0.015;
 const UNFREEZE_FORWARD_DELTA = 18;
 const FW_COLORS = ["#f7c651", "#ffd700", "#ffe066", "#ffb800", "#fff0a0"];
 
-function buildPath(n) {
+function buildPath(n, dims) {
+  const { LEFT_X, RIGHT_X, STEP_H } = dims;
   const totalH = PAD_T + n * STEP_H + PAD_B;
   const pins = [],
     segs = [];
@@ -1918,6 +1934,31 @@ export default function RoadMap() {
     window.addEventListener("themechange", handler);
     return () => window.removeEventListener("themechange", handler);
   }, []);
+
+  const [pathDims, setPathDims] = useState(getPathDims());
+
+  useEffect(() => {
+    let timer;
+    const handler = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        const newDims = getPathDims();
+        setPathDims((prev) =>
+          prev.LEFT_X === newDims.LEFT_X &&
+          prev.CARD_W === newDims.CARD_W &&
+          prev.STEP_H === newDims.STEP_H
+            ? prev
+            : newDims,
+        );
+      }, 180);
+    };
+    window.addEventListener("resize", handler);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("resize", handler);
+    };
+  }, []);
+
   const langs = Object.keys(DATA);
   const [lang, setLang] = useState("C");
   const [openCard, setOpenCard] = useState(null);
@@ -1940,8 +1981,11 @@ export default function RoadMap() {
   ]);
   const [cueIn, setCueIn] = useState(false);
 
+  const [isLoading, setIsLoading] = useState(false);
+  const [pageReady, setPageReady] = useState(false);
+
   const steps = DATA[lang];
-  const { d: pathD, pins, totalH } = buildPath(steps.length);
+  const { d: pathD, pins, totalH } = buildPath(steps.length, pathDims);
 
   const rootRef = useRef(null);
   const svgRef = useRef(null);
@@ -1969,20 +2013,24 @@ export default function RoadMap() {
 
   const theme = isLight ? "light-theme" : "dark-theme";
 
+  const subtitles = ["Scroll to reveal roadmap", "Click steps to explore"];
+  const [subtitleIndex, setSubtitleIndex] = useState(0);
+  const [animKey, setAnimKey] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setAnimKey((k) => k + 1);
+      setTimeout(() => {
+        setSubtitleIndex((prev) => (prev + 1) % subtitles.length);
+      }, 3000);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
   useEffect(() => {
     setTimeout(() => setH1In(true), 120);
     setTimeout(() => setPIn(true), 400);
-    langs.forEach((_, i) =>
-      setTimeout(
-        () =>
-          setTabsIn((p) => {
-            const n = [...p];
-            n[i] = true;
-            return n;
-          }),
-        600 + i * 110,
-      ),
-    );
+
     setTimeout(() => setCueIn(true), 1200);
   }, []);
 
@@ -1990,7 +2038,11 @@ export default function RoadMap() {
     cancelAnimationFrame(rafId.current);
 
     const newSteps = DATA[lang];
-    const { d: newD, pins: newPins, totalH: newH } = buildPath(newSteps.length);
+    const {
+      d: newD,
+      pins: newPins,
+      totalH: newH,
+    } = buildPath(newSteps.length, pathDims);
 
     [roadRef, shadRef, dashRef].forEach((r) => {
       if (r.current) {
@@ -2001,10 +2053,9 @@ export default function RoadMap() {
     });
     if (svgRef.current) {
       svgRef.current.setAttribute("viewBox", `0 0 ${VW} ${newH}`);
-      svgRef.current.style.height = newH + "px";
     }
     const sceneEl = svgRef.current?.parentElement;
-    if (sceneEl) sceneEl.style.height = newH + "px";
+    if (sceneEl) sceneEl.style.aspectRatio = `${VW} / ${newH}`;
     if (emojiWrap.current) {
       emojiWrap.current.setAttribute(
         "transform",
@@ -2033,8 +2084,10 @@ export default function RoadMap() {
 
     if (rootRef.current) rootRef.current.scrollTop = 0;
 
+    setPageReady(false);
+
     measureAndStart();
-  }, [lang]);
+  }, [lang, pathDims]);
 
   const measureAndStart = useCallback(() => {
     const road = roadRef.current,
@@ -2058,6 +2111,8 @@ export default function RoadMap() {
     iconProg.current = 0;
     frozenAt.current = null;
     startLoop();
+
+    setTimeout(() => setPageReady(true), 100);
 
     const currentPins = pinsRef.current;
     const SAMP = 120;
@@ -2224,6 +2279,8 @@ export default function RoadMap() {
     };
   }, [lang]);
 
+ 
+
   const calcCards = useCallback(() => {
     const svg = svgRef.current;
     if (!svg) return;
@@ -2231,18 +2288,32 @@ export default function RoadMap() {
     if (!svgScreenW) return;
     const scale = svgScreenW / VW;
     const HALF_R = (ROAD_W / 2) * scale;
-    const GAP = 10,
-      CARD_W = 260;
+    const GAP = svgScreenW < 500 ? 6 : 10;
+    const CARD_W = pathDims.CARD_W;
+    const topOffset = svgScreenW < 500 ? -28 : -34;
+
     setCardPos(
       pinsRef.current.map((pin) => {
-        const px = pin.x * scale,
-          py = pin.y * scale;
-        return pin.side === "left"
-          ? { left: px - HALF_R - GAP - CARD_W, top: py - 34, isLeft: true }
-          : { left: px + HALF_R + GAP, top: py - 34, isLeft: false };
+        const px = pin.x * scale;
+        const py = pin.y * scale;
+        if (pin.side === "left") {
+          return {
+            left: px - HALF_R - GAP - CARD_W,
+            top: py + topOffset,
+            isLeft: true,
+            width: CARD_W,
+          };
+        } else {
+          return {
+            left: px + HALF_R + GAP,
+            top: py + topOffset,
+            isLeft: false,
+            width: CARD_W,
+          };
+        }
       }),
     );
-  }, []);
+  }, [pathDims]);
 
   useEffect(() => {
     calcCards();
@@ -2252,7 +2323,11 @@ export default function RoadMap() {
     return () => ro.disconnect();
   }, [lang, calcCards]);
 
-  const toggle = (i) => setOpenCard((v) => (v === i ? null : i));
+
+  const toggle = (i) => {
+    if (window.innerWidth <= 900) return;
+    setOpenCard((v) => (v === i ? null : i));
+  };
 
   return (
     <div
@@ -2264,31 +2339,83 @@ export default function RoadMap() {
       <Header />
       <div className="rm-hdr">
         <h1 className={h1In ? "in" : ""}>Start Your Programming Journey</h1>
-        <p className={pIn ? "in" : ""}>
-          Scroll to reveal roadmap · Click steps to explore
-        </p>
+        <div className="rm-subtitle-wrap">
+          <p key={animKey} className="rm-subtitle-text">
+            {subtitles[subtitleIndex]}
+          </p>
+        </div>
         <div className="rm-tabs">
           {langs.map((l, i) => (
             <button
               key={l}
-              className={[l === lang && "act", tabsIn[i] && "in"]
-                .filter(Boolean)
-                .join(" ")}
-              onClick={() => setLang(l)}
+              className={l === lang ? "act" : ""}
+              onClick={() => {
+                setIsLoading(true);
+                setTimeout(() => {
+                  setLang(l);
+                  setIsLoading(false);
+                }, 600);
+              }}
             >
               {l}
             </button>
           ))}
         </div>
+        <p className="rm-journey-start">✦ Your {lang} journey starts here</p>
       </div>
-      <div className={`rm-cue ${cueIn ? "in" : ""}`}>↓ scroll to begin</div>
 
-      <div className="rm-scene" style={{ height: totalH + "px" }}>
+      {(!pageReady || isLoading) && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 9999,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "16px",
+            background: isLight ? "#fafafa" : "#0b0b0b",
+          }}
+        >
+          <div
+            style={{
+              width: 40,
+              height: 40,
+              border: `3px solid ${isLight ? "rgba(5,56,89,0.15)" : "rgba(247,198,81,0.15)"}`,
+              borderTop: `3px solid ${isLight ? "#053859" : "#f7c651"}`,
+              borderRadius: "50%",
+              animation: "rm-spin 0.7s linear infinite",
+            }}
+          />
+          <p
+            style={{
+              fontSize: "12px",
+              letterSpacing: "3px",
+              textTransform: "uppercase",
+              color: isLight ? "rgba(5,56,89,0.4)" : "rgba(247,198,81,0.4)",
+              margin: 0,
+              animation: "rm-fadeInOut 1.5s ease-in-out infinite",
+            }}
+          >
+            Loading Roadmap...
+          </p>
+          <style>{`
+      @keyframes rm-fadeInOut {
+        0%, 100% { opacity: 0.4; }
+        50% { opacity: 1; }
+      }
+    `}</style>
+        </div>
+      )}
+
+      <div className="rm-scene" style={{ aspectRatio: `${VW} / ${totalH}` }}>
         <svg
           ref={svgRef}
           className="rm-svg"
           viewBox={`0 0 ${VW} ${totalH}`}
-          style={{ height: totalH + "px" }}
+          preserveAspectRatio="xMidYMid meet"
+          style={{ height: "100%" }}
           xmlns="http://www.w3.org/2000/svg"
         >
           <defs>
@@ -2306,14 +2433,14 @@ export default function RoadMap() {
             ref={shadRef}
             d={pathD}
             fill="none"
-            stroke="rgba(0,0,0,.4)"
-            strokeWidth={ROAD_W + 14}
+            stroke="rgba(0,0,0,.13)"
+            strokeWidth={ROAD_W + 4}
             strokeLinecap="round"
             strokeLinejoin="round"
             style={{
               strokeDasharray: "0 99999",
               strokeDashoffset: "0",
-              filter: "blur(7px)",
+              filter: "blur(2px)",
             }}
           />
 
@@ -2360,8 +2487,6 @@ export default function RoadMap() {
 
             const fwCX = pin.x;
             const fwCY = by - 28;
-
-            
 
             return (
               <g
@@ -2547,7 +2672,7 @@ export default function RoadMap() {
                 style={{
                   left: `${pos.left}px`,
                   top: `${pos.top}px`,
-                  width: "260px",
+                  width: `${pos.width}px`,
                 }}
               >
                 <div
@@ -2590,6 +2715,7 @@ export default function RoadMap() {
                               <span className="rm-topic-arrow">▸</span>
                               <span className="rm-topic-text">{item.t}</span>
                             </span>
+                         
                             <div
                               className="rm-topic-desc"
                               style={{
@@ -2599,7 +2725,7 @@ export default function RoadMap() {
                               }}
                               onClick={(e) => e.stopPropagation()}
                             >
-                              <p>{item.d}</p>
+                              <p className="rm-topic-desc-text">{item.d}</p>
                             </div>
                           </div>
                         ))
@@ -2622,6 +2748,9 @@ export default function RoadMap() {
           })}
         </div>
       </div>
+      <p className="rm-journey-end">
+        ✦ You've reached the end of the road — now build the highway.
+      </p>
     </div>
   );
 }
