@@ -1872,7 +1872,6 @@ const PAD_B = 80;
 const MID_X = VW / 2;
 const ROAD_W = 46;
 
-
 function getPathDims() {
   if (typeof window === "undefined") {
     return { LEFT_X: 140, RIGHT_X: 620, STEP_H: 210, CARD_W: 260 };
@@ -1888,7 +1887,6 @@ function getPathDims() {
   if (w < 1066) return { LEFT_X: 140, RIGHT_X: 620, STEP_H: 205, CARD_W: 210 };
   return { LEFT_X: 140, RIGHT_X: 620, STEP_H: 210, CARD_W: 260 };
 }
-
 
 const PIN_OPEN_ZONE = 55;
 const PIN_CLOSE_ZONE = 200;
@@ -1962,6 +1960,7 @@ export default function RoadMap() {
   const langs = Object.keys(DATA);
   const [lang, setLang] = useState("C");
   const [openCard, setOpenCard] = useState(null);
+  const [modalCard, setModalCard] = useState(null);
   const [unlocked, setUnlocked] = useState(-1);
   const [activePin, setActivePin] = useState(null);
   const [emojiClass, setEmojiClass] = useState("idle");
@@ -2279,8 +2278,6 @@ export default function RoadMap() {
     };
   }, [lang]);
 
- 
-
   const calcCards = useCallback(() => {
     const svg = svgRef.current;
     if (!svg) return;
@@ -2322,7 +2319,6 @@ export default function RoadMap() {
     if (el) ro.observe(el);
     return () => ro.disconnect();
   }, [lang, calcCards]);
-
 
   const toggle = (i) => {
     if (window.innerWidth <= 900) return;
@@ -2675,11 +2671,27 @@ export default function RoadMap() {
                   width: `${pos.width}px`,
                 }}
               >
-                <div
+                {/* <div
                   className={`rm-card ${openCard === i ? "open" : ""}`}
                   onClick={() => toggle(i)}
                 >
                   <div className="rm-card-title">
+                    <span className="rm-card-ico">{steps[i]?.icon}</span>
+                    {steps[i]?.title}
+                  </div> */}
+                <div
+                  className={`rm-card ${openCard === i ? "open" : ""}`}
+                  onClick={() => toggle(i)}
+                >
+                  <div
+                    className="rm-card-title"
+                    onClick={(e) => {
+                      if (window.innerWidth <= 900) {
+                        e.stopPropagation();
+                        setModalCard(i);
+                      }
+                    }}
+                  >
                     <span className="rm-card-ico">{steps[i]?.icon}</span>
                     {steps[i]?.title}
                   </div>
@@ -2715,7 +2727,7 @@ export default function RoadMap() {
                               <span className="rm-topic-arrow">▸</span>
                               <span className="rm-topic-text">{item.t}</span>
                             </span>
-                         
+
                             <div
                               className="rm-topic-desc"
                               style={{
@@ -2747,6 +2759,68 @@ export default function RoadMap() {
             );
           })}
         </div>
+        {/* Mobile Modal */}
+        {modalCard !== null && (
+          <div className="rm-modal-backdrop" onClick={() => setModalCard(null)}>
+            <div className="rm-modal" onClick={(e) => e.stopPropagation()}>
+              {/* Header */}
+              <div className="rm-modal-header">
+                <h2 className="rm-modal-title">{steps[modalCard]?.title}</h2>
+                <button
+                  className="rm-modal-close"
+                  onClick={() => setModalCard(null)}
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Topics */}
+              <div className="rm-modal-topics">
+                {steps[modalCard]?.topics?.map((item, j) => (
+                  <div key={j} className="rm-modal-topic-wrap">
+                    <button
+                      className="rm-modal-topic-btn"
+                      onClick={(e) => {
+                        const wrap = e.currentTarget.closest(
+                          ".rm-modal-topic-wrap",
+                        );
+                        const desc = wrap.querySelector(".rm-modal-topic-desc");
+                        const isOpen = wrap.classList.toggle("open");
+                        // close others
+                        document
+                          .querySelectorAll(".rm-modal-topic-wrap.open")
+                          .forEach((w) => {
+                            if (w !== wrap) {
+                              w.classList.remove("open");
+                              w.querySelector(
+                                ".rm-modal-topic-desc",
+                              ).style.maxHeight = "0";
+                            }
+                          });
+                        desc.style.maxHeight = isOpen
+                          ? desc.scrollHeight + "px"
+                          : "0";
+                      }}
+                    >
+                      <span className="rm-modal-topic-arrow">▸</span>
+                      <span className="rm-modal-topic-text">{item.t}</span>
+                    </button>
+                    <div
+                      className="rm-modal-topic-desc"
+                      style={{
+                        maxHeight: "0",
+                        overflow: "hidden",
+                        transition: "max-height 0.3s ease",
+                      }}
+                    >
+                      <p className="rm-modal-topic-desc-text">{item.d}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
       <p className="rm-journey-end">
         ✦ You've reached the end of the road — now build the highway.

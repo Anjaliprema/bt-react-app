@@ -43,13 +43,11 @@ const HOVER_ZONE = 120;
 export default function HeroSlider() {
   const [current, setCurrent] = useState(0);
   const [direction, setDirection] = useState(1);
-  const [progress, setProgress] = useState(0);
   const [showLeft, setShowLeft] = useState(false);
   const [showRight, setShowRight] = useState(false);
   const [hasAnimated, setHasAnimated] = useState(false);
 
   const currentRef = useRef(0);
-  const rafRef = useRef(null);
   const timerRef = useRef(null);
   const startTsRef = useRef(null);
 
@@ -77,24 +75,6 @@ export default function HeroSlider() {
   );
 
   useEffect(() => {
-    setProgress(0);
-    startTsRef.current = null;
-
-    const tick = (ts) => {
-      if (!startTsRef.current) startTsRef.current = ts;
-      const pct = Math.min(
-        ((ts - startTsRef.current) / AUTOPLAY_MS) * 100,
-        100,
-      );
-      setProgress(pct);
-      if (pct < 100) rafRef.current = requestAnimationFrame(tick);
-    };
-
-    rafRef.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafRef.current);
-  }, [current]);
-
-  useEffect(() => {
     timerRef.current = setTimeout(() => goNext(), AUTOPLAY_MS);
     return () => clearTimeout(timerRef.current);
   }, [current, goNext]);
@@ -107,8 +87,6 @@ export default function HeroSlider() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [goNext, goPrev]);
-
-
 
   const variants = {
     enter: (dir) => ({
@@ -218,10 +196,6 @@ export default function HeroSlider() {
       >
         <FaArrowRight />
       </button>
-
-      <div style={s.bottomBar}>
-        
-      </div>
     </motion.section>
   );
 }

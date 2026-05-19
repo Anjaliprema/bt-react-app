@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { delay, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import Header from "./Header";
 import "./Home_Static.css";
 import sampleVideo from "../assets/BT_VIDEO.mp4";

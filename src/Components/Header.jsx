@@ -326,30 +326,61 @@ export default function Header() {
             },
           ].map(({ label, isActive, action }) => (
             <a
+              //   key={label}
+              //   onClick={() => {
+              //     action();
+              //     setMenuOpen(false);
+              //   }}
+              //   // style={{
+              //   //   fontWeight: isActive ? "700" : "500",
+              //   //   background: isActive
+              //   //     ? isLight
+              //   //       ? "rgba(5, 56, 89, 0.1)"
+              //   //       : "rgba(247, 198, 81, 0.12)"
+              //   //     : "transparent",
+              //   //   color: isActive
+              //   //     ? isLight
+              //   //       ? "#053859"
+              //   //       : "#f7c651"
+              //   //     : isLight
+              //   //       ? "#053859"
+              //   //       : "#ffffff",
+              //   //   borderRadius: "10px",
+              //   //   padding: "10px 16px",
+              //   //   display: "block",
+              //   //   transition: "all 0.2s ease",
+              //   // }}
+
+              //   style={{
+              //     fontWeight: isActive ? "700" : "500",
+              //     background: "transparent",
+              //     color: isActive
+              //       ? isLight
+              //         ? "#053859"
+              //         : "#f7c651"
+              //       : isLight
+              //         ? "#053859"
+              //         : "#ffffff",
+              //     borderRadius: "0",
+              //     borderBottom: isActive
+              //       ? isLight
+              //         ? "2px solid #053859"
+              //         : "2px solid #f7c651"
+              //       : "2px solid transparent",
+              //     padding: "10px 16px",
+              //     display: "block",
+              //     transition: "all 0.2s ease",
+              //   }}
+              // >
+              //   {label}
+              // </a>
+
               key={label}
               onClick={() => {
                 action();
                 setMenuOpen(false);
               }}
-              style={{
-                fontWeight: isActive ? "700" : "500",
-                background: isActive
-                  ? isLight
-                    ? "rgba(5, 56, 89, 0.1)"
-                    : "rgba(247, 198, 81, 0.12)"
-                  : "transparent",
-                color: isActive
-                  ? isLight
-                    ? "#053859"
-                    : "#f7c651"
-                  : isLight
-                    ? "#053859"
-                    : "#ffffff",
-                borderRadius: "10px",
-                padding: "10px 16px",
-                display: "block",
-                transition: "all 0.2s ease",
-              }}
+              className={`mobile-nav-link ${isActive ? "mobile-nav-link--active" : ""} ${isLight ? "mobile-nav-link--light" : "mobile-nav-link--dark"}`}
             >
               {label}
             </a>
