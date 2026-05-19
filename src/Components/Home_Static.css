@@ -4417,7 +4417,7 @@ div::-webkit-scrollbar {
     min-height: unset !important;
     flex-direction: column;
     align-items: flex-start;
-    padding: 90px 22px 40px;
+    padding: 110px 22px 40px;
     gap: 24px;
     overflow: visible;
   }
@@ -4453,7 +4453,7 @@ div::-webkit-scrollbar {
 
 @media (max-width: 480px) {
   .ahs-sticky {
-    padding: 80px 16px 36px;
+    padding: 100px 16px 36px;
   }
   .ahs-panel {
     height: 58vw !important;
