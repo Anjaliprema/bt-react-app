@@ -437,10 +437,6 @@ export default function CompanyOrbit({ isLight }) {
       ? selectedCompany
       : COMPANIES[autoIndex];
 
-  // const LOGO_R = 111;
-  // const TILE = 38;
-  // const HALF = 19;
-  // const STAGE_CENTER = 170;
   const stageSize = isMobile ? 290 : isTablet ? 300 : 340;
   const STAGE_CENTER = stageSize / 2;
   const LOGO_R = isMobile ? 95 : isTablet ? 99 : 111;

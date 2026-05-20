@@ -600,28 +600,6 @@ function StatCard({ stat, index, accent, isDark }) {
   const ref = useRef(null);
   const animated = useRef(false);
 
-  // useEffect(() => {
-  //   const observer = new IntersectionObserver(
-  //     ([entry]) => {
-  //       if (entry.isIntersecting && !animated.current) {
-  //         animated.current = true;
-  //         const duration = 2500;
-  //         const start = performance.now();
-  //         const easeOut = (t) => 1 - Math.pow(1 - t, 3);
-  //         const step = (now) => {
-  //           const p = Math.min((now - start) / duration, 1);
-  //           setCount(Math.round(easeOut(p) * stat.end));
-  //           if (p < 1) requestAnimationFrame(step);
-  //         };
-  //         setTimeout(() => requestAnimationFrame(step), index * 150);
-  //       }
-  //     },
-  //     { threshold: 0.3 },
-  //   );
-  //   if (ref.current) observer.observe(ref.current);
-  //   return () => observer.disconnect();
-  // }, [stat.end, index]);
-
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {

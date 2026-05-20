@@ -2671,14 +2671,6 @@ export default function RoadMap() {
                   width: `${pos.width}px`,
                 }}
               >
-                {/* <div
-                  className={`rm-card ${openCard === i ? "open" : ""}`}
-                  onClick={() => toggle(i)}
-                >
-                  <div className="rm-card-title">
-                    <span className="rm-card-ico">{steps[i]?.icon}</span>
-                    {steps[i]?.title}
-                  </div> */}
                 <div
                   className={`rm-card ${openCard === i ? "open" : ""}`}
                   onClick={() => toggle(i)}
@@ -2759,11 +2751,9 @@ export default function RoadMap() {
             );
           })}
         </div>
-        {/* Mobile Modal */}
         {modalCard !== null && (
           <div className="rm-modal-backdrop" onClick={() => setModalCard(null)}>
             <div className="rm-modal" onClick={(e) => e.stopPropagation()}>
-              {/* Header */}
               <div className="rm-modal-header">
                 <h2 className="rm-modal-title">{steps[modalCard]?.title}</h2>
                 <button
@@ -2774,7 +2764,6 @@ export default function RoadMap() {
                 </button>
               </div>
 
-              {/* Topics */}
               <div className="rm-modal-topics">
                 {steps[modalCard]?.topics?.map((item, j) => (
                   <div key={j} className="rm-modal-topic-wrap">
@@ -2786,7 +2775,6 @@ export default function RoadMap() {
                         );
                         const desc = wrap.querySelector(".rm-modal-topic-desc");
                         const isOpen = wrap.classList.toggle("open");
-                        // close others
                         document
                           .querySelectorAll(".rm-modal-topic-wrap.open")
                           .forEach((w) => {
