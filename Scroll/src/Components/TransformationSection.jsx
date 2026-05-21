@@ -47,8 +47,7 @@ function AnimatedCounter({ from, to, suffix, inView, delay = 0 }) {
   );
 }
 
-
-function RadarChart({ inView, view }) {
+function RadarChart({ inView, view, beforeProgress = 1 }) {
   const size = 220;
   const cx = size / 2;
   const cy = size / 2;
@@ -78,13 +77,20 @@ function RadarChart({ inView, view }) {
   const toPath = (pts) =>
     pts.map((p, i) => `${i === 0 ? "M" : "L"}${p[0]},${p[1]}`).join(" ") + "Z";
 
-  const beforePts = radarSkills.map((s, i) => getPoint(s.before, i));
+  const beforePts = radarSkills.map((s, i) =>
+    getPoint(s.before * beforeProgress, i),
+  );
 
   const afterPts = radarSkills.map((s, i) =>
     getPoint(s.before + (s.after - s.before) * progress, i),
   );
 
-  const displayPts = view === "before" ? beforePts : afterPts;
+  const displayPts =
+    view === "empty"
+      ? radarSkills.map((_, i) => getPoint(0, i))
+      : view === "before"
+        ? beforePts
+        : afterPts;
 
   const gridLevels = [25, 50, 75, 100];
 
@@ -177,54 +183,60 @@ function TransformationSection({ isLight }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, amount: 0.4 });
   const [barProgress, setBarProgress] = useState(0);
-  const [skillView, setSkillView] = useState("after");
-  const [radarView, setRadarView] = useState("after");
+
+  const [skillView, setSkillView] = useState("empty");
+  const [radarView, setRadarView] = useState("empty");
   const [tooltip, setTooltip] = useState(null);
   const [revealDone, setRevealDone] = useState(false);
   const revealDoneRef = useRef(false);
   const cleanupRef = useRef(null);
   const [showHint, setShowHint] = useState(false);
-
-  useEffect(() => {
-    if (!inView) return;
-    const controls = animate(0, 1, {
-      duration: 1.8,
-      delay: 0.3,
-      ease: [0.16, 1, 0.3, 1],
-      onUpdate: setBarProgress,
-    });
-    return controls.stop;
-  }, [inView]);
+  const [radarReady, setRadarReady] = useState(false);
+  const [beforeProgress, setBeforeProgress] = useState(0);
 
   useEffect(() => {
     if (!inView || revealDoneRef.current) return;
 
-    const scrollY = window.scrollY;
-
     document.body.style.overflow = "hidden";
     document.documentElement.style.overflow = "hidden";
-
-    setSkillView("before");
-    setRadarView("before");
 
     const listenTimer = setTimeout(() => {
       const runReveal = () => {
         if (revealDoneRef.current) return;
         revealDoneRef.current = true;
 
-        setSkillView("after");
-        setRadarView("after");
-
         window.removeEventListener("wheel", blockScroll);
         window.removeEventListener("touchmove", blockScroll);
         window.removeEventListener("keydown", handleKey);
         window.removeEventListener("click", runReveal);
 
-        setTimeout(() => {
-          document.body.style.overflow = "";
-          document.documentElement.style.overflow = "";
-          setRevealDone(true);
-        }, 1800);
+        setSkillView("before");
+        setRadarView("before");
+
+        animate(0, 1, {
+          duration: 1.2,
+          ease: [0.16, 1, 0.3, 1],
+          onUpdate: setBeforeProgress,
+          onComplete: () => {
+            setRadarReady(true);
+
+            setTimeout(() => {
+              setSkillView("after");
+              setRadarView("after");
+
+              animate(0, 1, {
+                duration: 1.8,
+                ease: [0.16, 1, 0.3, 1],
+                onUpdate: setBarProgress,
+                onComplete: () => {
+                  document.body.style.overflow = "";
+                  document.documentElement.style.overflow = "";
+                  setRevealDone(true);
+                },
+              });
+            }, 800);
+          },
+        });
       };
 
       const handleKey = (e) => {
@@ -287,8 +299,6 @@ function TransformationSection({ isLight }) {
     easing: "easeOut",
   });
 
-
-
   return (
     <section
       className={`tsection ${isLight ? "ts-light" : "ts-dark"}`}
@@ -300,7 +310,6 @@ function TransformationSection({ isLight }) {
         animate={inView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.7 }}
       >
-        
         <h2 ref={aboutTitle.ref} className="ts-title">
           From Beginner to Industry-Ready
         </h2>
@@ -372,9 +381,12 @@ function TransformationSection({ isLight }) {
             <div className="ts-skill-list" style={{ position: "relative" }}>
               {skills.map((skill, i) => {
                 const displayVal =
-                  skillView === "after"
-                    ? skill.before + (skill.after - skill.before) * barProgress
-                    : skill.before;
+                  skillView === "empty"
+                    ? 0
+                    : skillView === "before"
+                      ? skill.before * beforeProgress
+                      : skill.before +
+                        (skill.after - skill.before) * barProgress;
 
                 return (
                   <motion.div
@@ -537,14 +549,18 @@ function TransformationSection({ isLight }) {
             </div>
 
             <div className="ts-radar-wrap">
-              <RadarChart inView={inView} view={radarView} />
+              <RadarChart
+                inView={inView}
+                view={radarView}
+                beforeProgress={beforeProgress}
+              />
             </div>
           </motion.div>
         </div>
 
         {showHint && (
           <motion.div
-            className="ts-scroll-hint"
+            className="ts-scroll-hint ts-scroll-hint-wrapper"
             style={{
               position: "absolute",
               top: "20%",
@@ -575,138 +591,6 @@ function TransformationSection({ isLight }) {
         }}
       >
         <span></span>
-      </motion.div>
-
-      <motion.div
-        className="ts-panel ts-stats"
-        initial={{ opacity: 0, x: 50 }}
-        animate={inView ? { opacity: 1, x: 0 } : {}}
-        transition={{ duration: 0.7, delay: 2.0 }}
-      >
-        <h3 className="ts-panel-title">Key Outcomes</h3>
-
-        <div className="ts-stat-grid">
-          {stats.map((s, i) => (
-            <motion.div
-              key={s.label}
-              className="ts-stat-card"
-              initial={{ opacity: 0, y: 24 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ delay: 0.4 + i * 0.1 }}
-            >
-              <svg
-                className="ts-spark"
-                viewBox="0 0 60 24"
-                preserveAspectRatio="none"
-              >
-                <defs>
-                  <linearGradient id={`sg${i}`} x1="0" x2="1" y1="0" y2="0">
-                    <stop
-                      offset="0%"
-                      stopColor="var(--ts-accent)"
-                      stopOpacity="0.25"
-                    />
-                    <stop
-                      offset="100%"
-                      stopColor="var(--ts-accent)"
-                      stopOpacity="1"
-                    />
-                  </linearGradient>
-                </defs>
-                <motion.polyline
-                  points={`0,${24 - (s.before / 100) * 20} 20,${24 - (s.before / 100) * 20} 40,4 60,2`}
-                  fill="none"
-                  stroke={`url(#sg${i})`}
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  initial={{ pathLength: 0 }}
-                  animate={inView ? { pathLength: 1 } : {}}
-                  transition={{ duration: 1.5, delay: 0.6 + i * 0.1 }}
-                />
-              </svg>
-
-              <div className="ts-stat-values">
-                <span className="ts-stat-before">
-                  {s.before}
-                  {s.suffix}
-                </span>
-                <span className="ts-stat-arrow">→</span>
-                <span className="ts-stat-after">
-                  <AnimatedCounter
-                    from={s.before}
-                    to={s.after}
-                    suffix={s.suffix}
-                    inView={inView}
-                    delay={0.5 + i * 0.1}
-                  />
-                </span>
-              </div>
-              <p className="ts-stat-label">{s.label}</p>
-
-              <svg className="ts-arc" viewBox="0 0 36 36">
-                <circle
-                  cx="18"
-                  cy="18"
-                  r="15.9"
-                  fill="none"
-                  stroke="rgba(255,255,255,0.05)"
-                  strokeWidth="3"
-                />
-                <motion.circle
-                  cx="18"
-                  cy="18"
-                  r="15.9"
-                  fill="none"
-                  stroke="var(--ts-accent)"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeDasharray={`${s.after} 100`}
-                  strokeDashoffset="25"
-                  initial={{ pathLength: 0 }}
-                  animate={inView ? { pathLength: 1 } : {}}
-                  transition={{
-                    duration: 1.6,
-                    delay: 0.5 + i * 0.1,
-                    ease: [0.16, 1, 0.3, 1],
-                  }}
-                  style={{
-                    transformOrigin: "center",
-                    transform: "rotate(-90deg)",
-                  }}
-                />
-              </svg>
-            </motion.div>
-          ))}
-        </div>
-
-        <div className="ts-tech-row">
-          {[
-            { label: "HTML", color: "#e34f26" },
-            { label: "CSS", color: "rgb(244, 29, 108)" },
-            { label: "JS", color: "#f7c651" },
-            { label: "React", color: "#61dafb" },
-            { label: "Node", color: "#962f9f" },
-            { label: "Express", color: " #1c7ab9" },
-            { label: "MongoDB", color: "#4db33d" },
-          ].map((t, i) => (
-            <motion.span
-              key={t.label}
-              className="ts-tech-pill"
-              style={{ "--tc": t.color }}
-              initial={{ opacity: 0, scale: 0.5 }}
-              animate={inView ? { opacity: 1, scale: 1 } : {}}
-              transition={{
-                delay: 0.7 + i * 0.06,
-                type: "spring",
-                stiffness: 220,
-                damping: 14,
-              }}
-            >
-              {t.label}
-            </motion.span>
-          ))}
-        </div>
       </motion.div>
     </section>
   );

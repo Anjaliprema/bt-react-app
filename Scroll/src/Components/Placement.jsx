@@ -221,6 +221,7 @@ function HeroCards({ isLight }) {
 
   return (
     <div
+      className="placement-hero-cards-inner"
       style={{
         display: "flex",
         gap: 20,
@@ -339,6 +340,7 @@ function HeroCards({ isLight }) {
                 background: isLight
                   ? "linear-gradient(to top, rgba(5, 55, 89, 0.22) 0%, rgba(5, 55, 89, 0.26) 10px, transparent 100%)"
                   : "linear-gradient(to top, rgba(0, 0, 0, 0.18) 0%, rgba(247,198,81,0.15) 1%, transparent 100%)",
+                overflowY: "auto",
               }}
             />
 
@@ -454,14 +456,6 @@ function StudentCard({ student, isLight, accent, borderColor, index }) {
   const [hovered, setHovered] = useState(false);
   return (
     <motion.div
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{
-        duration: 0.55,
-        delay: index * 0.08,
-        ease: [0.16, 1, 0.3, 1],
-      }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
@@ -469,13 +463,7 @@ function StudentCard({ student, isLight, accent, borderColor, index }) {
         overflow: "hidden",
         background: isLight ? "#f0f4f8" : "#111827",
         border: `1.5px solid ${hovered ? accent : borderColor}`,
-        boxShadow: hovered
-          ? isLight
-            ? "0 16px 48px rgba(5,56,89,0.14)"
-            : "0 16px 48px rgba(0,0,0,0.55)"
-          : isLight
-            ? "0 2px 12px rgba(5,56,89,0.05)"
-            : "0 2px 12px rgba(0,0,0,0.25)",
+
         transition: "all 0.25s ease",
         transform: hovered ? "translateY(-5px)" : "translateY(0)",
       }}
@@ -629,10 +617,13 @@ function Testimonials({ isLight, accent, isDark, borderColor }) {
   const [current, setCurrent] = useState(0);
   const [dragX, setDragX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
-  const [flying, setFlying] = useState(null); // { dir, card }
+  const [flying, setFlying] = useState(null);
   const startXRef = useRef(0);
   const cardRef = useRef(null);
   const total = TESTIMONIALS.length;
+
+  const autoRef = useRef(null);
+  const isUserInteracting = useRef(false);
 
   const CARD_COLORS_DARK = [
     "linear-gradient(145deg,#1a2744,#0d1a36)",
@@ -674,6 +665,8 @@ function Testimonials({ isLight, accent, isDark, borderColor }) {
   const onMouseDown = (e) => {
     e.preventDefault();
     setIsDragging(true);
+    isUserInteracting.current = true;
+    clearInterval(autoRef.current);
     startXRef.current = e.touches ? e.touches[0].clientX : e.clientX;
   };
 
@@ -686,6 +679,7 @@ function Testimonials({ isLight, accent, isDark, borderColor }) {
   const onMouseUp = () => {
     if (!isDragging) return;
     setIsDragging(false);
+    isUserInteracting.current = false;
     if (Math.abs(dragX) > 80) advance(dragX > 0 ? 1 : -1);
     else setDragX(0);
   };
@@ -702,6 +696,20 @@ function Testimonials({ isLight, accent, isDark, borderColor }) {
       window.removeEventListener("touchend", onMouseUp);
     };
   }, [isDragging, dragX]);
+
+  useEffect(() => {
+    const startAuto = () => {
+      autoRef.current = setInterval(() => {
+        if (!isUserInteracting.current) {
+          advance(1);
+        }
+      }, 4000);
+    };
+
+    startAuto();
+
+    return () => clearInterval(autoRef.current);
+  }, []);
 
   const bg = isLight ? "#f5f7fa" : "#080a0f";
   const cardColors = isLight ? CARD_COLORS_LIGHT : CARD_COLORS_DARK;
@@ -823,10 +831,9 @@ function Testimonials({ isLight, accent, isDark, borderColor }) {
           transition={{ duration: 0.6, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
           style={{
             fontFamily: "Poppins,sans-serif",
-            fontSize: "clamp(22px,3.5vw,38px)",
+            fontSize: "clamp(22px,3.5vw,30px)",
             fontWeight: 900,
             lineHeight: 1.1,
-            letterSpacing: "-0.03em",
             color: isLight ? "#1a1a2e" : "#f2ede4",
             margin: "0 0 12px",
           }}
@@ -858,16 +865,16 @@ function Testimonials({ isLight, accent, isDark, borderColor }) {
       <motion.div
         style={{
           position: "relative",
-          width: "min(800px,95vw)",
+          width: "min(700px, 90vw)",
           margin: "0 auto",
           zIndex: 1,
+          transform: "translateX(-50%)",
         }}
         initial={{ opacity: 0, y: 50, scale: 0.96 }}
         whileInView={{ opacity: 1, y: 0, scale: 1 }}
         viewport={{ once: true, amount: 0.2 }}
         transition={{ duration: 0.75, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
       >
-        {/* LEFT */}
         <div className="t-zone t-zone-l">
           <div className="t-arw" onClick={prev}>
             <div className="t-arw-face">
@@ -878,7 +885,15 @@ function Testimonials({ isLight, accent, isDark, borderColor }) {
           </div>
         </div>
 
-        <div style={{ position: "relative", flex: 1, height: 330, zIndex: 1 }}>
+        <div
+          style={{
+            position: "relative",
+            height: "auto",
+            minHeight: "clamp(320px, 80vw, 330px)",
+            zIndex: 1,
+            width: "100%",
+          }}
+        >
           {TESTIMONIALS.map((t, i) => {
             const pos = (((i - current) % total) + total) % total;
             const s = stackProps[pos] || {
@@ -919,7 +934,7 @@ function Testimonials({ isLight, accent, isDark, borderColor }) {
                   inset: 0,
                   background: cardColors[i % cardColors.length],
                   borderRadius: 12,
-                  overflow: "hidden",
+                  overflow: "auto",
                   zIndex: s.zIndex,
                   cursor: isTop ? "grab" : "default",
                   pointerEvents: isTop ? "auto" : "none",
@@ -984,6 +999,7 @@ function Testimonials({ isLight, accent, isDark, borderColor }) {
                   </svg>
 
                   <p
+                    className="testimonial-card-text"
                     style={{
                       fontFamily: "Poppins,sans-serif",
                       fontSize: 14.5,
@@ -1581,396 +1597,6 @@ function SkillsList({ isLight, accent }) {
   );
 }
 
-function SkillsTimeline({ isLight, accent, isDark }) {
-  const mutedCol = isLight ? "rgba(5,56,89,0.4)" : "rgba(242,237,228,0.35)";
-  const pillBorder = isLight ? "rgba(5,56,89,0.15)" : "rgba(247,198,81,0.2)";
-  const rowDivider = isLight ? "rgba(5,56,89,0.05)" : "rgba(255,255,255,0.05)";
-  const bg = isLight ? "white" : "black";
-  const fadeL = `linear-gradient(to right, ${bg}, transparent)`;
-  const fadeR = `linear-gradient(to left, ${bg}, transparent)`;
-
-  const ROW1 = [
-    "Full Stack Developer",
-    "Java Developer",
-    "SDE at Amazon",
-    "Frontend Engineer",
-    "MERN Stack Dev",
-    "Product Engineer",
-    "React Developer",
-  ];
-  const ROW2 = [
-    "Backend Engineer",
-    "DevOps Engineer",
-    "SDE at Zoho",
-    "Spring Boot Dev",
-    "Node.js Engineer",
-    "Software Engineer",
-    "QA Engineer",
-  ];
-  const ROW3 = [
-    "Tech Lead",
-    "SDE-2 at Capgemini",
-    "DSA Expert",
-    "API Developer",
-    "SDE at TCS",
-    "Cloud Engineer",
-    "System Designer",
-  ];
-
-  const Pill = ({ text }) => (
-    <div
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 7,
-        padding: "0 14px",
-        height: 32,
-        borderRadius: 999,
-        border: `1.5px solid ${pillBorder}`,
-        whiteSpace: "nowrap",
-        flexShrink: 0,
-        userSelect: "none",
-      }}
-    >
-      <span
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: 16,
-          height: 16,
-          borderRadius: 999,
-          color: isLight ? "#053859" : "#f7c651",
-          fontSize: 10,
-          fontWeight: 700,
-          lineHeight: 1,
-          flexShrink: 0,
-        }}
-      >
-        ✓
-      </span>
-      <span
-        style={{
-          fontSize: 11.5,
-          fontWeight: 700,
-          color: accent,
-          letterSpacing: "0.01em",
-          fontFamily: "Poppins, sans-serif",
-        }}
-      >
-        {text}
-      </span>
-    </div>
-  );
-
-  const Track = ({ items, animName, duration }) => (
-    <div
-      style={{
-        flex: 1,
-        overflow: "hidden",
-        display: "flex",
-        alignItems: "center",
-        borderBottom: `1px solid ${rowDivider}`,
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          gap: 8,
-          width: "max-content",
-          padding: "0 4px",
-          animation: `${animName} ${duration}s linear infinite`,
-        }}
-      >
-        {[...items, ...items, ...items].map((t, i) => (
-          <Pill key={i} text={t} />
-        ))}
-      </div>
-    </div>
-  );
-
-  const skills = [
-    {
-      icon: <FaCode size={18} />,
-      title: "Data Structures & Algorithms",
-      desc: "Master arrays, trees, graphs and solve complex problems confidently in any interview.",
-    },
-    {
-      icon: <FaLayerGroup size={18} />,
-      title: "Full Stack Development",
-      desc: "Build end-to-end web applications with modern frameworks — from backend APIs to pixel-perfect UIs.",
-    },
-    {
-      icon: <FaProjectDiagram size={18} />,
-      title: "System Design",
-      desc: "Design scalable, fault-tolerant systems. Crack senior-level interview rounds with confidence.",
-    },
-    {
-      icon: <FaComments size={18} />,
-      title: "Communication & Soft Skills",
-      desc: "Present yourself powerfully, handle HR rounds, and build a standout professional presence.",
-    },
-    {
-      icon: <FaClipboardList size={18} />,
-      title: "Interview Preparation",
-      desc: "Mock interviews, resume building, and real-world coding challenges to get you job-ready fast.",
-    },
-  ];
-
-  return (
-    <section
-      style={{
-        padding: "30px 0px",
-        background: isLight ? "#ffffff" : "#0a0a0a",
-      }}
-    >
-      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.4 }}
-          transition={{ duration: 0.7 }}
-          style={{ textAlign: "center", marginBottom: 52 }}
-        >
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            style={{
-              fontFamily: "Poppins, sans-serif",
-              fontSize: "clamp(22px, 3.5vw, 38px)",
-              fontWeight: 900,
-              lineHeight: 1.1,
-              letterSpacing: "-0.03em",
-              color: isLight ? "#1a1a2e" : "#f2ede4",
-              margin: "0 0 12px",
-            }}
-          >
-            Get the skills you need for a job that is in{" "}
-            <span style={{ color: accent }}>demand.</span>
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.18, ease: [0.16, 1, 0.3, 1] }}
-            style={{
-              fontFamily: "Poppins, sans-serif",
-              fontSize: 13,
-              color: mutedCol,
-              lineHeight: 1.8,
-              margin: "0 auto",
-              maxWidth: "65%",
-            }}
-          >
-            The modern labor market dictates its own terms. To be a competitive
-            specialist today requires more than professional skills — it demands
-            a complete transformation.
-          </motion.p>
-        </motion.div>
-
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: 60,
-            alignItems: "start",
-          }}
-        >
-          <SkillsList isLight={isLight} accent={accent} />
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true, amount: 0.4 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            style={{
-              borderRadius: 20,
-              overflow: "hidden",
-              background: "transparent",
-            }}
-          >
-            
-<div
-  style={{
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    height: 350,
-    overflow: "hidden",
-    position: "relative",
-  }}
->
-  <motion.div
-    initial={{ opacity: 0, scale: 0.6 }}
-    whileHover={{ opacity: 1, scale: 1 }}    
-    style={{
-      position: "absolute",
-      inset: 0,
-      pointerEvents: "none",
-    }}
-  />
-
-  <motion.div
-    style={{ width: "100%", height: "100%", position: "relative" }}
-    initial="rest"
-    whileHover="hover"
-    animate="rest"
-  >
-    <motion.div
-      variants={{
-        rest: { opacity: 0, scale: 0.7 },
-        hover: { opacity: 1, scale: 1 },
-      }}
-      transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-      style={{
-        position: "absolute",
-        inset: 0,
-        borderRadius: "50%",
-        background: isLight
-          ? "radial-gradient(ellipse at 60% 35%, rgba(7,76,122,0.13) 0%, rgba(10,92,143,0.07) 45%, transparent 70%)"
-          : "radial-gradient(ellipse at 60% 35%, rgba(247,198,81,0.18) 0%, rgba(247,198,81,0.08) 45%, transparent 70%)",
-        filter: "blur(18px)",
-        pointerEvents: "none",
-        zIndex: 0,
-      }}
-    />
-
-    {[
-  { top: "27%", left: "21%" },
-  { top: "21%", left: "35%" },
-  { top: "10%", left: "48%" },
-  { top: "21%", left: "61%" },
-  { top: "25%", left: "74%" },
-].map((pos, i) => (
-  <motion.div
-    key={i}
-    variants={{
-      rest: { opacity: 0, scale: 0 },
-      hover: {
-        opacity: 1,
-        scale: 1,
-        transition: { delay: i * 0.07, duration: 0.45, ease: [0.16, 1, 0.3, 1] },
-      },
-    }}
-    style={{
-      position: "absolute",
-      top: pos.top,
-      left: pos.left,
-      width: 25,
-      height: 25,
-      borderRadius: "50%",
-      background: isLight
-        ? "rgba(7,76,122,0.2)"
-        : "rgba(247,198,81,0.3)",
-      boxShadow: isLight
-        ? "0 0 18px 10px rgba(7,76,122,0.28), 0 0 40px 18px rgba(7,76,122,0.12)"
-        : "0 0 18px 10px rgba(247,198,81,0.45), 0 0 40px 18px rgba(247,198,81,0.2)",
-      filter: "blur(6px)",
-      pointerEvents: "none",
-      zIndex: 3,
-      transform: "translate(-50%, calc(-50% + 30px))",  // ← +60px shifts all glows down together
-    }}
-  />
-))}
-  
-
-    <motion.img
-      src={Vector_Img}
-      alt="Skills illustration"
-      variants={{
-        rest: { scale: 1, filter: "drop-shadow(0px 0px 0px transparent)" },
-        hover: {
-          scale: 1.06,
-          filter: isLight
-            ? "drop-shadow(0px 8px 24px rgba(7,76,122,0.18))"
-            : "drop-shadow(0px 8px 24px rgba(247,198,81,0.25))",
-        },
-      }}
-      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-      style={{
-        width: "100%",
-        height: "100%",
-        objectFit: "contain",
-        display: "block",
-        padding: "0px 28px",
-        background: "transparent",
-        cursor: "pointer",
-        position: "relative",
-        zIndex: 2,
-      }}
-    />
-  </motion.div>
-</div>
-          
-
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                overflow: "hidden",
-                position: "relative",
-                minHeight: 108,
-                gap: 15,
-              }}
-            >
-              <div
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  bottom: 0,
-                  left: 0,
-                  width: 44,
-                  background: fadeL,
-                  zIndex: 4,
-                  pointerEvents: "none",
-                }}
-              />
-              <div
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  bottom: 0,
-                  right: 0,
-                  width: 44,
-                  background: fadeR,
-                  zIndex: 4,
-                  pointerEvents: "none",
-                }}
-              />
-              <Track
-                items={ROW1}
-                animName="marqueeLeft"
-                duration={60}
-                pillBorder={pillBorder}
-                accent={accent}
-                isLight={isLight}
-              />
-              <Track
-                items={ROW2}
-                animName="marqueeRight"
-                duration={70}
-                pillBorder={pillBorder}
-                accent={accent}
-                isLight={isLight}
-              />
-              <Track
-                items={ROW3}
-                animName="marqueeLeft"
-                duration={55}
-                pillBorder={pillBorder}
-                accent={accent}
-                isLight={isLight}
-              />
-            </div>
-          </motion.div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 export default function Placement() {
   const [isLight, setIsLight] = useState(
     () => localStorage.getItem("theme") !== "dark",
@@ -1985,6 +1611,54 @@ export default function Placement() {
   const accent = isLight ? "#074c7a" : "#f7c651";
   const subColor = isLight ? "rgba(5,56,89,0.62)" : "rgba(255,255,255,0.52)";
   const borderColor = isLight ? "rgba(5,56,89,0.12)" : "rgba(247,198,81,0.15)";
+
+  const [mobileIndex, setMobileIndex] = useState(0);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 600);
+
+  const carouselRef = useRef(null);
+
+  const filtered =
+    activeFilter === "All"
+      ? PLACED_STUDENTS
+      : PLACED_STUDENTS.filter((s) => s.category === activeFilter);
+
+  useEffect(() => {
+    const el = carouselRef.current;
+    if (!el) return;
+
+    const handleScroll = () => {
+      if (el.scrollLeft >= el.scrollWidth / 2) {
+        el.scrollLeft = 0;
+      }
+    };
+    el.addEventListener("scroll", handleScroll);
+
+    return () => {
+      el.removeEventListener("scroll", handleScroll);
+    };
+  }, [activeFilter]);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 600);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setMobileIndex((prev) => (prev + 1) % filtered.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [filtered.length]);
+
+  useEffect(() => {
+    if (isMobile) return;
+    if (!carouselRef.current) return;
+    carouselRef.current.scrollTo({
+      left: mobileIndex * 242,
+      behavior: "smooth",
+    });
+  }, [mobileIndex, isMobile]);
 
   useEffect(() => {
     const h = () => setIsLight(localStorage.getItem("theme") !== "dark");
@@ -2008,11 +1682,6 @@ export default function Placement() {
     };
   }, []);
 
-  const filtered =
-    activeFilter === "All"
-      ? PLACED_STUDENTS
-      : PLACED_STUDENTS.filter((s) => s.category === activeFilter);
-
   return (
     <div
       ref={pageRef}
@@ -2022,6 +1691,7 @@ export default function Placement() {
       <Header />
 
       <section
+        className="placement-hero-section"
         style={{
           height: "100vh",
           padding: "80px 40px 0px",
@@ -2063,21 +1733,9 @@ export default function Placement() {
           }}
         />
 
-        <div
-          style={{
-            maxWidth: 1200,
-            margin: "0 auto",
-            width: "100%",
-            display: "grid",
-            gridTemplateColumns: "1fr 1.4fr",
-            gap: 40,
-            alignItems: "center",
-            position: "relative",
-            zIndex: 1,
-          }}
-        >
+        <div className="placement-hero-grid">
           {" "}
-          <div style={{ maxWidth: 580 }}>
+          <div className="placement-hero-text" style={{ maxWidth: 580 }}>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -2116,12 +1774,33 @@ export default function Placement() {
                     fontWeight: 900,
                     lineHeight: 1.0,
                     letterSpacing: "-0.04em",
-                    color: isLight
-                      ? "rgba(5,56,89,0.15)"
-                      : "rgba(247,198,81,0.15)",
                     margin: 0,
                     userSelect: "none",
                     whiteSpace: "nowrap",
+                    WebkitTextStroke: isLight ? "1px #053859" : "1px #f7c651",
+                    WebkitTextFillColor: "transparent",
+                    color: "transparent",
+                  }}
+                >
+                  Better Tomorrow
+                </p>
+
+                <p
+                  style={{
+                    fontFamily: "Poppins, sans-serif",
+                    fontSize: "clamp(32px, 5.5vw, 60px)",
+                    fontWeight: 900,
+                    lineHeight: 1.0,
+                    letterSpacing: "-0.04em",
+                    color: isLight
+                      ? "rgba(5,56,89,0.12)"
+                      : "rgba(247,198,81,0.12)",
+                    margin: 0,
+                    userSelect: "none",
+                    whiteSpace: "nowrap",
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
                   }}
                 >
                   Better Tomorrow
@@ -2190,6 +1869,7 @@ export default function Placement() {
             </motion.p>
           </div>
           <motion.div
+            className="placement-hero-cards"
             initial={{ opacity: 0, x: 60 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
@@ -2219,9 +1899,8 @@ export default function Placement() {
             <h2
               style={{
                 fontFamily: "Poppins, sans-serif",
-                fontSize: "clamp(22px, 4vw, 34px)",
+                fontSize: "clamp(22px, 4vw, 30px)",
                 fontWeight: 900,
-                letterSpacing: "-0.03em",
                 color: isLight ? "#373738" : "rgba(255,255,255,0.92)",
                 margin: 0,
               }}
@@ -2247,7 +1926,10 @@ export default function Placement() {
               return (
                 <button
                   key={tab}
-                  onClick={() => setActiveFilter(tab)}
+                  onClick={() => {
+                    setActiveFilter(tab);
+                    setMobileIndex(0);
+                  }}
                   style={{
                     padding: "9px 20px",
                     borderRadius: 999,
@@ -2282,36 +1964,295 @@ export default function Placement() {
             })}
           </div>
 
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeFilter}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-                gap: 20,
-              }}
-            >
-              {filtered.map((s, i) => (
-                <StudentCard
-                  key={s.id}
-                  student={s}
-                  isLight={isLight}
-                  accent={accent}
-                  borderColor={borderColor}
-                  index={i}
-                />
-              ))}
-            </motion.div>
-          </AnimatePresence>
+          <div style={{ position: "relative" }}>
+            {isMobile ? (
+              <div style={{ position: "relative", width: "100%" }}>
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={mobileIndex}
+                    initial={{ opacity: 0, x: 60 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -60 }}
+                    transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                    style={{ width: "100%", padding: "10px 4px" }}
+                  >
+                    <StudentCard
+                      student={filtered[mobileIndex]}
+                      isLight={isLight}
+                      accent={accent}
+                      borderColor={borderColor}
+                      index={mobileIndex}
+                    />
+                  </motion.div>
+                </AnimatePresence>
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    gap: 6,
+                    marginTop: 16,
+                    marginBottom: 8,
+                  }}
+                >
+                  {filtered.map((_, i) => (
+                    <div
+                      key={i}
+                      onClick={() => setMobileIndex(i)}
+                      style={{
+                        width: i === mobileIndex ? 20 : 6,
+                        height: 6,
+                        borderRadius: 3,
+                        background:
+                          i === mobileIndex
+                            ? accent
+                            : isLight
+                              ? "rgba(5,56,89,0.2)"
+                              : "rgba(255,255,255,0.2)",
+                        cursor: "pointer",
+                        transition: "all 0.3s ease",
+                      }}
+                    />
+                  ))}
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    gap: 12,
+                    marginTop: 12,
+                  }}
+                >
+                  <button
+                    onClick={() =>
+                      setMobileIndex(
+                        (prev) =>
+                          (prev - 1 + filtered.length) % filtered.length,
+                      )
+                    }
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = accent;
+                      e.currentTarget.style.color = isLight ? "#fff" : "#000";
+                      e.currentTarget.style.borderColor = accent;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "transparent";
+                      e.currentTarget.style.color = accent;
+                      e.currentTarget.style.borderColor = borderColor;
+                    }}
+                    style={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: "50%",
+                      border: `1.5px solid ${borderColor}`,
+                      background: "transparent",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: accent,
+                      transition: "all 0.2s ease",
+                    }}
+                  >
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                    >
+                      <polyline points="15 18 9 12 15 6" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() =>
+                      setMobileIndex((prev) => (prev + 1) % filtered.length)
+                    }
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = accent;
+                      e.currentTarget.style.color = isLight ? "#fff" : "#000";
+                      e.currentTarget.style.borderColor = accent;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "transparent";
+                      e.currentTarget.style.color = accent;
+                      e.currentTarget.style.borderColor = borderColor;
+                    }}
+                    style={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: "50%",
+                      border: `1.5px solid ${borderColor}`,
+                      background: "transparent",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: accent,
+                      transition: "all 0.2s ease",
+                    }}
+                  >
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                    >
+                      <polyline points="9 18 15 12 9 6" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    ref={carouselRef}
+                    key={activeFilter}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="cards-carousel"
+                    style={{
+                      display: "flex",
+                      gap: 12,
+                      overflowX: "auto",
+                      overflowY: "visible",
+                      paddingBottom: 12,
+                      paddingTop: 10,
+                      scrollSnapType: "x mandatory",
+                      WebkitOverflowScrolling: "touch",
+                      cursor: "pointer",
+                      msOverflowStyle: "none",
+                      scrollbarWidth: "none",
+                    }}
+                  >
+                    {[...filtered, ...filtered].map((s, i) => (
+                      <div
+                        key={`${s.id}-${i}`}
+                        style={{
+                          flexShrink: 0,
+                          width: 230,
+                          scrollSnapAlign: "start",
+                        }}
+                      >
+                        <StudentCard
+                          student={s}
+                          isLight={isLight}
+                          accent={accent}
+                          borderColor={borderColor}
+                          index={i}
+                        />
+                      </div>
+                    ))}
+                  </motion.div>
+                </AnimatePresence>
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    gap: 12,
+                    marginTop: 28,
+                  }}
+                >
+                  <button
+                    onClick={() => {
+                      if (carouselRef.current)
+                        carouselRef.current.scrollBy({
+                          left: -260,
+                          behavior: "smooth",
+                        });
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = accent;
+                      e.currentTarget.style.color = isLight ? "#fff" : "#000";
+                      e.currentTarget.style.borderColor = accent;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "transparent";
+                      e.currentTarget.style.color = accent;
+                      e.currentTarget.style.borderColor = borderColor;
+                    }}
+                    style={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: "50%",
+                      border: `1.5px solid ${borderColor}`,
+                      background: "transparent",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: accent,
+                      transition: "all 0.2s ease",
+                    }}
+                  >
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                    >
+                      <polyline points="15 18 9 12 15 6" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (carouselRef.current)
+                        carouselRef.current.scrollBy({
+                          left: 260,
+                          behavior: "smooth",
+                        });
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = accent;
+                      e.currentTarget.style.color = isLight ? "#fff" : "#000";
+                      e.currentTarget.style.borderColor = accent;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "transparent";
+                      e.currentTarget.style.color = accent;
+                      e.currentTarget.style.borderColor = borderColor;
+                    }}
+                    style={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: "50%",
+                      border: `1.5px solid ${borderColor}`,
+                      background: "transparent",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: accent,
+                      transition: "all 0.2s ease",
+                    }}
+                  >
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                    >
+                      <polyline points="9 18 15 12 9 6" />
+                    </svg>
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </section>
-
-      <SkillsTimeline isLight={isLight} accent={accent} isDark={isDark} />
-
       <Testimonials
         isLight={isLight}
         accent={accent}

@@ -166,7 +166,6 @@ function StudentCard({ student, isLight, accent, borderColor, index, revealed })
         >
           {student.pkg}
         </div>
-        {/* Name */}
         <div style={{ position: "absolute", bottom: 12, left: 14 }}>
           <p style={{ margin: 0, color: "#fff", fontWeight: 700, fontSize: 14, fontFamily: "Poppins, sans-serif" }}>
             {student.name}

@@ -151,7 +151,7 @@ export default function Header() {
             onMouseEnter={(e) => navLinkHover(e, isOnline, isLight)}
             onMouseLeave={(e) => navLinkLeave(e, isOnline, isLight)}
           >
-            Programs
+            Program
           </a>
 
           <a
@@ -160,7 +160,7 @@ export default function Header() {
             onMouseEnter={(e) => navLinkHover(e, isPlacement, isLight)}
             onMouseLeave={(e) => navLinkLeave(e, isPlacement, isLight)}
           >
-            Placements
+            Placement
           </a>
 
           <a
@@ -189,7 +189,7 @@ export default function Header() {
           >
             About Us
           </a>
-            <a
+          <a
             onClick={() => navigate("/Contact_us")}
             style={navLinkStyle(isContact)}
             onMouseEnter={(e) => navLinkHover(e, isContact, isLight)}
@@ -252,6 +252,41 @@ export default function Header() {
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.3 }}
         >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              padding: "0 4px 6px",
+            }}
+          >
+            <motion.div
+              className="theme-toggle"
+              onClick={() => {
+                toggleTheme();
+                setMenuOpen(false);
+              }}
+              style={{ perspective: 400 }}
+            >
+              <motion.div
+                className="toggle-3d-wrap"
+                animate={{ rotateY: isLight ? 0 : 180 }}
+                transition={{ duration: 0.55, ease: [0.34, 1.4, 0.64, 1] }}
+                style={{
+                  transformStyle: "preserve-3d",
+                  position: "relative",
+                  width: 38,
+                  height: 38,
+                }}
+              >
+                <div className="toggle-face toggle-front">
+                  <FaMoon />
+                </div>
+                <div className="toggle-face toggle-back">
+                  <FaSun />
+                </div>
+              </motion.div>
+            </motion.div>
+          </div>
           {[
             {
               label: "Home",
@@ -259,7 +294,7 @@ export default function Header() {
               action: () => scrollToSection("home"),
             },
             {
-              label: "Programs",
+              label: "Program",
               isActive: isOnline,
               action: () => navigate("/Programs"),
             },
@@ -268,7 +303,7 @@ export default function Header() {
               isActive: isPlacement,
               action: () => navigate("/Placement"),
             },
-            
+
             {
               label: "Road Map",
               isActive: isRoadmap,
@@ -284,7 +319,7 @@ export default function Header() {
               isActive: isAbout,
               action: () => navigate("/About_us"),
             },
-              {
+            {
               label: "Contact Us",
               isActive: isContact,
               action: () => navigate("/Contact_us"),
@@ -296,25 +331,7 @@ export default function Header() {
                 action();
                 setMenuOpen(false);
               }}
-              style={{
-                fontWeight: isActive ? "700" : "500",
-                background: isActive
-                  ? isLight
-                    ? "rgba(5, 56, 89, 0.1)"
-                    : "rgba(247, 198, 81, 0.12)"
-                  : "transparent",
-                color: isActive
-                  ? isLight
-                    ? "#053859"
-                    : "#f7c651"
-                  : isLight
-                    ? "#053859"
-                    : "#ffffff",
-                borderRadius: "10px",
-                padding: "10px 16px",
-                display: "block",
-                transition: "all 0.2s ease",
-              }}
+              className={`mobile-nav-link ${isActive ? "mobile-nav-link--active" : ""} ${isLight ? "mobile-nav-link--light" : "mobile-nav-link--dark"}`}
             >
               {label}
             </a>

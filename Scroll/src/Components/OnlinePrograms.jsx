@@ -3,12 +3,6 @@ import { motion } from "framer-motion";
 import Header from "./Header";
 import "./Home_Static.css";
 import Footer from "./Footer";
-import pimg1 from "../assets/pimg1.png";
-import pimg2 from "../assets/pimg2.png";
-import pimg3 from "../assets/pimg3.png";
-import pimg4 from "../assets/pimg4.png";
-import pimg5 from "../assets/pimg5.png";
-import pimg6 from "../assets/pimg6.png";
 import { AnimatePresence } from "framer-motion";
 import cimg1 from "../assets/cimg1.png";
 import cimg2 from "../assets/cimg2.png";
@@ -96,7 +90,6 @@ function CustomSelect({
         </span>
       </div>
 
-      {/* Dropdown */}
       {open && (
         <div
           style={{
@@ -173,6 +166,10 @@ const COURSES = {
       level: "Beginner",
       img: cimg1,
       desc: "Master Java from basics to enterprise-level web apps.",
+      mode: "Online & Offline",
+      pricing: "Paid",
+      price: "₹4,999",
+      duration: "3 Months",
     },
     {
       id: "p2",
@@ -181,6 +178,10 @@ const COURSES = {
       level: "Intermediate",
       img: cimg16,
       desc: "MongoDB, Express, React, Node — the complete JS stack.",
+      mode: "Online",
+      pricing: "Paid",
+      price: "₹3,999",
+      duration: "2 Months",
     },
     {
       id: "p3",
@@ -189,6 +190,10 @@ const COURSES = {
       level: "Intermediate",
       img: cimg3,
       desc: "Crack interviews with in-depth DSA using Java.",
+      mode: "Online",
+      pricing: "Paid",
+      price: "₹2,999",
+      duration: "6 Weeks",
     },
     {
       id: "p4",
@@ -197,6 +202,10 @@ const COURSES = {
       level: "Beginner",
       img: cimg8,
       desc: "Python fundamentals with AI/ML applications.",
+      mode: "Online",
+      pricing: "Free",
+      price: null,
+      duration: "1 Month",
     },
     {
       id: "p5",
@@ -205,6 +214,10 @@ const COURSES = {
       level: "Beginner",
       img: cimg11,
       desc: "From zero to JS hero — complete frontend path.",
+      mode: "Online",
+      pricing: "Paid",
+      price: "₹1,999",
+      duration: "6 Weeks",
     },
     {
       id: "p6",
@@ -213,6 +226,10 @@ const COURSES = {
       level: "Advanced",
       img: cimg15,
       desc: "CI/CD, Docker, cloud — ship software faster.",
+      mode: "Offline",
+      pricing: "Paid",
+      price: "₹5,999",
+      duration: "2 Months",
     },
     {
       id: "p7",
@@ -221,6 +238,10 @@ const COURSES = {
       level: "Advanced",
       img: cimg22,
       desc: "Enterprise-grade Java backend with Angular frontend.",
+      mode: "Online & Offline",
+      pricing: "Paid",
+      price: "₹5,499",
+      duration: "3 Months",
     },
     {
       id: "p8",
@@ -229,6 +250,10 @@ const COURSES = {
       level: "Advanced",
       img: cimg6,
       desc: "Design scalable systems — crack senior roles.",
+      mode: "Online",
+      pricing: "Free",
+      price: null,
+      duration: "4 Weeks",
     },
     {
       id: "p9",
@@ -237,6 +262,10 @@ const COURSES = {
       level: "Advanced",
       img: cimg14,
       desc: "Build beautiful cross-platform mobile apps for Android and iOS using Flutter.",
+      mode: "Online",
+      pricing: "Paid",
+      price: "₹3,499",
+      duration: "2 Months",
     },
     {
       id: "p10",
@@ -245,6 +274,10 @@ const COURSES = {
       level: "Advanced",
       img: cimg27,
       desc: "Learn how to protect systems, networks, and applications from cyber attacks.",
+      mode: "Online",
+      pricing: "Paid",
+      price: "₹4,499",
+      duration: "2 Months",
     },
   ],
 
@@ -256,6 +289,10 @@ const COURSES = {
       level: "Beginner",
       img: cimg10,
       desc: "Master the foundation of all programming languages.",
+      mode: "Online & Offline",
+      pricing: "Paid",
+      price: "₹999",
+      duration: "4 Weeks",
     },
     {
       id: "pr2",
@@ -264,6 +301,10 @@ const COURSES = {
       level: "Beginner",
       img: cimg8,
       desc: "Clean, versatile, dominant in AI & data science.",
+      mode: "Online",
+      pricing: "Free",
+      price: null,
+      duration: "4 Weeks",
     },
     {
       id: "pr3",
@@ -272,6 +313,10 @@ const COURSES = {
       level: "Beginner",
       img: cimg11,
       desc: "The language of the web — frontend & backend.",
+      mode: "Online",
+      pricing: "Paid",
+      price: "₹1,499",
+      duration: "6 Weeks",
     },
     {
       id: "pr4",
@@ -280,8 +325,11 @@ const COURSES = {
       level: "Intermediate",
       img: cimg1,
       desc: "Enterprise-grade, write once run anywhere.",
+      mode: "Online & Offline",
+      pricing: "Paid",
+      price: "₹1,999",
+      duration: "6 Weeks",
     },
-
     {
       id: "pr5",
       title: "C++",
@@ -289,6 +337,10 @@ const COURSES = {
       level: "Advanced",
       img: cimg9,
       desc: "Object-oriented powerhouse for competitive programming.",
+      mode: "Online & Offline",
+      pricing: "Paid",
+      price: "₹1,999",
+      duration: "6 Weeks",
     },
     {
       id: "pr6",
@@ -297,6 +349,10 @@ const COURSES = {
       level: "Advanced",
       img: cimg18,
       desc: "A strongly typed, open-source programming language.",
+      mode: "Online",
+      pricing: "Paid",
+      price: "₹1,499",
+      duration: "4 Weeks",
     },
     {
       id: "pr7",
@@ -305,8 +361,11 @@ const COURSES = {
       level: "Intermediate",
       img: cimg19,
       desc: "A modern, object-oriented programming language.",
+      mode: "Online",
+      pricing: "Free",
+      price: null,
+      duration: "4 Weeks",
     },
-
     {
       id: "pr8",
       title: "SQL",
@@ -314,8 +373,13 @@ const COURSES = {
       level: "Intermediate",
       img: cimg20,
       desc: "Standard programming language used to interact with and manage data stored in relational databases.",
+      mode: "Online",
+      pricing: "Paid",
+      price: "₹1,299",
+      duration: "3 Weeks",
     },
   ],
+
   fullstack: [
     {
       id: "f1",
@@ -324,6 +388,10 @@ const COURSES = {
       level: "Beginner",
       img: cimg1,
       desc: "Master Java from basics to enterprise-level web apps.",
+      mode: "Online & Offline",
+      pricing: "Paid",
+      price: "₹4,999",
+      duration: "3 Months",
     },
     {
       id: "f2",
@@ -332,6 +400,10 @@ const COURSES = {
       level: "Beginner",
       img: cimg5,
       desc: "HTML to deployment — the complete full-stack path.",
+      mode: "Online",
+      pricing: "Free",
+      price: null,
+      duration: "1 Month",
     },
     {
       id: "f3",
@@ -340,6 +412,10 @@ const COURSES = {
       level: "Intermediate",
       img: cimg13,
       desc: "Build modern full-stack apps with React and Node.",
+      mode: "Online & Offline",
+      pricing: "Paid",
+      price: "₹3,499",
+      duration: "2 Months",
     },
     {
       id: "f4",
@@ -348,6 +424,10 @@ const COURSES = {
       level: "Intermediate",
       img: cimg16,
       desc: "MongoDB, Express, React, Node — the complete JS stack.",
+      mode: "Online & Offline",
+      pricing: "Paid",
+      price: "₹3,999",
+      duration: "2 Months",
     },
     {
       id: "f5",
@@ -356,6 +436,10 @@ const COURSES = {
       level: "Intermediate",
       img: cimg17,
       desc: "Angular-powered full stack with MongoDB and Express.",
+      mode: "Offline",
+      pricing: "Paid",
+      price: "₹3,999",
+      duration: "2 Months",
     },
     {
       id: "f6",
@@ -364,6 +448,10 @@ const COURSES = {
       level: "Advanced",
       img: cimg22,
       desc: "Enterprise-grade Java backend with Angular frontend.",
+      mode: "Online & Offline",
+      pricing: "Paid",
+      price: "₹5,499",
+      duration: "3 Months",
     },
     {
       id: "f7",
@@ -371,7 +459,11 @@ const COURSES = {
       category: "Full Stack",
       level: "Intermediate",
       img: cimg12,
-      desc: "Design beautiful, responsive, and interactive websites..",
+      desc: "Design beautiful, responsive, and interactive websites.",
+      mode: "Online & Offline",
+      pricing: "Paid",
+      price: "₹2,499",
+      duration: "6 Weeks",
     },
     {
       id: "f8",
@@ -380,6 +472,10 @@ const COURSES = {
       level: "Intermediate",
       img: cimg23,
       desc: "Learn how to build the server-side logic that powers modern web applications.",
+      mode: "Offline",
+      pricing: "Paid",
+      price: "₹2,999",
+      duration: "6 Weeks",
     },
     {
       id: "f9",
@@ -388,8 +484,13 @@ const COURSES = {
       level: "Beginner",
       img: cimg3,
       desc: "Learn how to build modern responsive websites from scratch.",
+      mode: "Online & Offline",
+      pricing: "Free",
+      price: null,
+      duration: "3 Weeks",
     },
   ],
+
   interview: [
     {
       id: "i1",
@@ -398,6 +499,10 @@ const COURSES = {
       level: "Intermediate",
       img: cimg3,
       desc: "Crack interviews with in-depth DSA using Java.",
+      mode: "Online",
+      pricing: "Paid",
+      price: "₹2,999",
+      duration: "6 Weeks",
     },
     {
       id: "i2",
@@ -406,6 +511,10 @@ const COURSES = {
       level: "Beginner",
       img: cimg2,
       desc: "Data structures from scratch using C.",
+      mode: "Online",
+      pricing: "Paid",
+      price: "₹2,499",
+      duration: "6 Weeks",
     },
     {
       id: "i3",
@@ -414,6 +523,10 @@ const COURSES = {
       level: "Advanced",
       img: cimg6,
       desc: "Design scalable systems — crack senior roles.",
+      mode: "Online",
+      pricing: "Free",
+      price: null,
+      duration: "4 Weeks",
     },
     {
       id: "i4",
@@ -422,8 +535,11 @@ const COURSES = {
       level: "Advanced",
       img: cimg14,
       desc: "Build beautiful cross-platform mobile apps for Android and iOS using Flutter.",
+      mode: "Online",
+      pricing: "Paid",
+      price: "₹3,499",
+      duration: "2 Months",
     },
-
     {
       id: "i5",
       title: "DBMS & SQL",
@@ -431,6 +547,10 @@ const COURSES = {
       level: "Beginner",
       img: cimg4,
       desc: "Relational models, SQL and normalization.",
+      mode: "Online",
+      pricing: "Paid",
+      price: "₹1,499",
+      duration: "3 Weeks",
     },
     {
       id: "i6",
@@ -439,6 +559,10 @@ const COURSES = {
       level: "Beginner",
       img: cimg24,
       desc: "Prepare for quantitative and logical rounds asked in company placement tests.",
+      mode: "Online & Offline",
+      pricing: "Paid",
+      price: "₹999",
+      duration: "3 Weeks",
     },
     {
       id: "i7",
@@ -447,6 +571,10 @@ const COURSES = {
       level: "Beginner",
       img: cimg25,
       desc: "Improve confidence, communication, and interview performance.",
+      mode: "Online & Offline",
+      pricing: "Free",
+      price: null,
+      duration: "2 Weeks",
     },
     {
       id: "i8",
@@ -454,9 +582,12 @@ const COURSES = {
       category: "Interview Prep",
       level: "Beginner",
       img: cimg26,
-      desc: "Relational models, SQL and normalization.",
+      desc: "Craft a winning resume and ace every interview round.",
+      mode: "Online & Offline",
+      pricing: "Free",
+      price: null,
+      duration: "2 Weeks",
     },
-
     {
       id: "i9",
       title: "OS & Networks",
@@ -464,6 +595,10 @@ const COURSES = {
       level: "Intermediate",
       img: cimg7,
       desc: "Core CS concepts every interviewer asks.",
+      mode: "Online",
+      pricing: "Paid",
+      price: "₹1,499",
+      duration: "4 Weeks",
     },
     {
       id: "i10",
@@ -472,6 +607,10 @@ const COURSES = {
       level: "Advanced",
       img: cimg27,
       desc: "Learn how to protect systems, networks, and applications from cyber attacks.",
+      mode: "Online",
+      pricing: "Paid",
+      price: "₹4,499",
+      duration: "2 Months",
     },
   ],
 };
@@ -508,8 +647,8 @@ function CourseCard({
         border: `1.5px solid ${
           hovered
             ? isLight
-              ? themeAccentA 
-              : "rgba(235, 235, 235, 0.57)" 
+              ? themeAccentA
+              : "rgba(235, 235, 235, 0.57)"
             : isLight
               ? "rgba(5,56,89,0.1)"
               : "rgba(255,255,255,0.07)"
@@ -522,10 +661,10 @@ function CourseCard({
       viewport={{ once: true }}
       transition={{
         duration: 0.6,
-        delay: index * 0.15, 
+        delay: index * 0.15,
         ease: "easeOut",
       }}
-      whileHover={{ y: -5 }}
+      whileHover={window.innerWidth > 768 ? { y: -5 } : {}}
     >
       <div className="ec-card-img-wrap">
         <img src={course.img} alt={course.title} className="ec-card-img" />
@@ -533,12 +672,88 @@ function CourseCard({
       </div>
 
       <div className="ec-card-body">
-        <h4 className="ec-card-title" style={{ color: textColor }}>
-          {course.title}
-        </h4>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            justifyContent: "space-between",
+            gap: 6,
+          }}
+        >
+          <h4
+            className="ec-card-title"
+            style={{ color: textColor, margin: 0, flex: 1 }}
+          >
+            {course.title}
+          </h4>
+          <span
+            style={{
+              fontSize: 9,
+              fontWeight: 600,
+              color: isLight ? "#053859" : "#93c5fd",
+              background: isLight
+                ? "rgba(5,56,89,0.07)"
+                : "rgba(147,197,253,0.1)",
+              borderRadius: 20,
+              padding: "2px 7px",
+              whiteSpace: "nowrap",
+              flexShrink: 0,
+              marginTop: 2,
+            }}
+          >
+            {course.mode}
+          </span>
+        </div>
+
         <p className="ec-card-desc" style={{ color: subColor }}>
           {course.desc}
         </p>
+
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 5,
+            marginTop: 6,
+            flexWrap: "wrap",
+          }}
+        >
+          <span
+            style={{
+              fontSize: 10,
+              fontWeight: 700,
+              color:
+                course.pricing === "Free"
+                  ? isLight
+                    ? "#157a47"
+                    : "#6ee7b7"
+                  : isLight
+                    ? "#b45309"
+                    : "#fbbf24",
+            }}
+          >
+            {course.pricing === "Free" ? "Free" : course.price}
+          </span>
+          <span
+            style={{
+              fontSize: 9,
+              opacity: 0.35,
+              color: isLight ? "#053859" : "#fff",
+            }}
+          >
+            ·
+          </span>
+          <span
+            style={{
+              fontSize: 10,
+              fontWeight: 500,
+              color: isLight ? "#6b7280" : "#9ca3af",
+            }}
+          >
+            {course.duration}
+          </span>
+        </div>
+
         <button
           className="ec-card-btn btn-2"
           onClick={() => onApply(course.title)}
@@ -565,8 +780,24 @@ function FilterSection({
   const levelRef = useRef(null);
   const sectionRef = useRef(null);
 
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [mobileIndex1, setMobileIndex1] = useState(0);
+  const [slideDir1, setSlideDir1] = useState("left");
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    let timer;
+    const debounced = () => {
+      clearTimeout(timer);
+      timer = setTimeout(handleResize, 150);
+    };
+    window.addEventListener("resize", debounced);
+    return () => window.removeEventListener("resize", debounced);
+  }, []);
+
   const wrapRef = useRef(null);
   const [cardWidth, setCardWidth] = useState(0);
+  const [pendulumOffset, setPendulumOffset] = useState(120);
 
   useEffect(() => {
     const updateWidth = () => {
@@ -574,11 +805,17 @@ function FilterSection({
         const totalWidth = wrapRef.current.offsetWidth;
         const gap = 20 * 4;
         setCardWidth((totalWidth - gap) / 5);
+        setPendulumOffset(Math.floor(totalWidth * 0.15));
       }
     };
     updateWidth();
-    window.addEventListener("resize", updateWidth);
-    return () => window.removeEventListener("resize", updateWidth);
+    let timer;
+    const debounced = () => {
+      clearTimeout(timer);
+      timer = setTimeout(updateWidth, 150);
+    };
+    window.addEventListener("resize", debounced);
+    return () => window.removeEventListener("resize", debounced);
   }, []);
 
   const bg = isLight ? "white" : "#0a0a0a";
@@ -653,6 +890,18 @@ function FilterSection({
   };
 
   const courses = getFilteredCourses();
+
+  useEffect(() => {
+    if (!isMobile || expanded) return;
+    const mobileCourses = courses;
+    if (mobileCourses.length === 0) return;
+
+    const id = setInterval(() => {
+      setSlideDir1("left");
+      setMobileIndex1((p) => (p + 1) % courses.length);
+    }, 3000);
+    return () => clearInterval(id);
+  }, [isMobile, expanded, courses]);
 
   const row1 = courses.slice(0, 5);
   const row2 = courses.slice(5, 10);
@@ -848,77 +1097,195 @@ function FilterSection({
       <AnimatePresence mode="wait">
         {!expanded ? (
           <motion.div
-            key={`pendulum-${activeLevel ?? "nl"}-${activeCategory ?? "nc"}`}
+            key={`pendulum-${isMobile ? "mobile" : "desktop"}-${activeLevel ?? "nl"}-${activeCategory ?? "nc"}`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            {row1Items.length > 0 && (
-              <div
-                ref={wrapRef}
-                className="ec-pendulum-wrap ec-pendulum-wrap--left"
-                style={{ marginBottom: 20 }}
-              >
-                <motion.div
-                  className="ec-pendulum-row ec-pendulum-row--left"
-                  animate={{ x: [-120, 120, -120] }}
-                  transition={{
-                    duration: 12,
-                    ease: "easeInOut",
-                    repeat: Infinity,
-                  }}
-                >
-                  {" "}
-                  {row1Items.map((course, index) => (
-                    <div key={`r1-${index}`} className="ec-pendulum-card">
-                      <CourseCard
-                        course={course}
-                        index={0}
-                        isLight={isLight}
-                        textColor={textColor}
-                        subColor={subColor}
-                        themeAccentA={themeAccentA}
-                        borderColor={borderColor}
-                        onApply={onApply}
-                      />
+            {isMobile ? (
+              (() => {
+                const allCourses = [...row1Items, ...row2Items].filter(
+                  (c, i, arr) => arr.findIndex((x) => x.id === c.id) === i,
+                );
+                const mobileCourses = courses;
+                return (
+                  <div style={{ width: "100%", padding: "6px 0" }}>
+                    <div
+                      style={{
+                        width: "100%",
+                        overflow: "hidden",
+                        position: "relative",
+                      }}
+                    >
+                      <AnimatePresence mode="wait" initial={false}>
+                        <motion.div
+                          key={mobileIndex1}
+                          initial={{
+                            x: slideDir1 === "left" ? "100%" : "-100%",
+                            opacity: 0,
+                          }}
+                          animate={{ x: 0, opacity: 1 }}
+                          exit={{
+                            x: slideDir1 === "left" ? "-100%" : "100%",
+                            opacity: 0,
+                          }}
+                          transition={{ duration: 0.35, ease: "easeInOut" }}
+                        >
+                          <CourseCard
+                            course={mobileCourses[mobileIndex1]}
+                            index={0}
+                            isLight={isLight}
+                            textColor={textColor}
+                            subColor={subColor}
+                            themeAccentA={themeAccentA}
+                            borderColor={borderColor}
+                            onApply={onApply}
+                          />
+                        </motion.div>
+                      </AnimatePresence>
                     </div>
-                  ))}
-                </motion.div>
-              </div>
-            )}
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 16,
+                        marginTop: 16,
+                      }}
+                    >
+                      <button
+                        onClick={() => {
+                          setSlideDir1("right");
+                          setMobileIndex1(
+                            (p) =>
+                              (p - 1 + mobileCourses.length) %
+                              mobileCourses.length,
+                          );
+                        }}
+                        style={{
+                          width: 38,
+                          height: 38,
+                          borderRadius: "50%",
+                          border: `1.5px solid ${isLight ? "rgba(5,56,89,0.25)" : "rgba(255,255,255,0.2)"}`,
+                          background: "transparent",
+                          color: isLight ? "#053859" : "#f0f0f0",
+                          fontSize: 18,
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        ‹
+                      </button>
+                      <span
+                        style={{
+                          fontSize: 12,
+                          color: isLight ? "#5a6170" : "#9ba3af",
+                        }}
+                      >
+                        {mobileIndex1 + 1} / {mobileCourses.length}
+                      </span>
 
-            {row2.length > 0 && (
-              <div
-                className="ec-pendulum-wrap ec-pendulum-wrap--right"
-                ref={wrapRef}
-              >
-                <motion.div
-                  className="ec-pendulum-row ec-pendulum-row--right"
-                  animate={{ x: [120, -120, 120] }}
-                  transition={{
-                    duration: 12,
-                    ease: "easeInOut",
-                    repeat: Infinity,
-                  }}
-                >
-                  {" "}
-                  {row2Items.map((course, index) => (
-                    <div key={`r2-${index}`} className="ec-pendulum-card">
-                      <CourseCard
-                        course={course}
-                        index={0}
-                        isLight={isLight}
-                        textColor={textColor}
-                        subColor={subColor}
-                        themeAccentA={themeAccentA}
-                        borderColor={borderColor}
-                        onApply={onApply}
-                      />
+                      <button
+                        onClick={() => {
+                          setSlideDir1("left");
+                          setMobileIndex1(
+                            (p) => (p + 1) % mobileCourses.length,
+                          );
+                        }}
+                        style={{
+                          width: 38,
+                          height: 38,
+                          borderRadius: "50%",
+                          border: `1.5px solid ${isLight ? "rgba(5,56,89,0.25)" : "rgba(255,255,255,0.2)"}`,
+                          background: "transparent",
+                          color: isLight ? "#053859" : "#f0f0f0",
+                          fontSize: 18,
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        ›
+                      </button>
                     </div>
-                  ))}
-                </motion.div>
-              </div>
+                  </div>
+                );
+              })()
+            ) : (
+              <>
+                {row1Items.length > 0 && (
+                  <div
+                    ref={wrapRef}
+                    className="ec-pendulum-wrap ec-pendulum-wrap--left"
+                    style={{ marginBottom: 20 }}
+                  >
+                    <motion.div
+                      className="ec-pendulum-row ec-pendulum-row--left"
+                      animate={{
+                        x: [-pendulumOffset, pendulumOffset, -pendulumOffset],
+                      }}
+                      transition={{
+                        duration: 12,
+                        ease: "easeInOut",
+                        repeat: Infinity,
+                      }}
+                    >
+                      {row1Items.map((course, index) => (
+                        <div key={`r1-${index}`} className="ec-pendulum-card">
+                          <CourseCard
+                            course={course}
+                            index={0}
+                            isLight={isLight}
+                            textColor={textColor}
+                            subColor={subColor}
+                            themeAccentA={themeAccentA}
+                            borderColor={borderColor}
+                            onApply={onApply}
+                          />
+                        </div>
+                      ))}
+                    </motion.div>
+                  </div>
+                )}
+
+                {row2.length > 0 && (
+                  <div
+                    className="ec-pendulum-wrap ec-pendulum-wrap--right"
+                    ref={wrapRef}
+                  >
+                    <motion.div
+                      className="ec-pendulum-row ec-pendulum-row--right"
+                      animate={{
+                        x: [pendulumOffset, -pendulumOffset, pendulumOffset],
+                      }}
+                      transition={{
+                        duration: 12,
+                        ease: "easeInOut",
+                        repeat: Infinity,
+                      }}
+                    >
+                      {row2Items.map((course, index) => (
+                        <div key={`r2-${index}`} className="ec-pendulum-card">
+                          <CourseCard
+                            course={course}
+                            index={0}
+                            isLight={isLight}
+                            textColor={textColor}
+                            subColor={subColor}
+                            themeAccentA={themeAccentA}
+                            borderColor={borderColor}
+                            onApply={onApply}
+                          />
+                        </div>
+                      ))}
+                    </motion.div>
+                  </div>
+                )}
+              </>
             )}
           </motion.div>
         ) : (
@@ -950,7 +1317,6 @@ function FilterSection({
         <div className="ec-view-all-wrap">
           <button
             className="ec-view-all-btn"
-          
             onClick={() => {
               const next = !expanded;
               setExpanded(next);
@@ -974,7 +1340,6 @@ function FilterSection({
   );
 }
 
-
 function CourseRow({
   title,
   subtitle,
@@ -994,10 +1359,24 @@ function CourseRow({
   const isPaused = useRef(false);
   const offsetRef = useRef(0);
   const [cardWidth, setCardWidth] = useState(280);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [mobileIndex, setMobileIndex] = useState(0);
+  const [slideDir, setSlideDir] = useState("left");
   const GAP = 20;
 
   const loopItems = [...courses, ...courses, ...courses];
   const total = courses.length;
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    let timer;
+    const debounced = () => {
+      clearTimeout(timer);
+      timer = setTimeout(handleResize, 150);
+    };
+    window.addEventListener("resize", debounced);
+    return () => window.removeEventListener("resize", debounced);
+  }, []);
 
   useEffect(() => {
     const measure = () => {
@@ -1019,6 +1398,14 @@ function CourseRow({
   useEffect(() => {
     if (expanded) return;
 
+    if (isMobile) {
+      const id = setInterval(() => {
+        setSlideDir("left");
+        setMobileIndex((p) => (p + 1) % courses.length);
+      }, 3000);
+      return () => clearInterval(id);
+    }
+
     const id = setInterval(() => {
       if (isPaused.current || !trackRef.current) return;
 
@@ -1034,7 +1421,7 @@ function CourseRow({
           offsetRef.current = offsetRef.current - total;
           trackRef.current.style.transition = "none";
           trackRef.current.style.transform = `translateX(${-(offsetRef.current * step)}px)`;
-        }, 620); 
+        }, 620);
       } else {
         trackRef.current.style.transition = "transform 0.6s ease-in-out";
         trackRef.current.style.transform = `translateX(${-(offsetRef.current * step)}px)`;
@@ -1042,7 +1429,13 @@ function CourseRow({
     }, 1800);
 
     return () => clearInterval(id);
-  }, [expanded, cardWidth, total]);
+  }, [expanded, cardWidth, total, isMobile, courses.length]);
+
+  useEffect(() => {
+    if (window.innerWidth <= 600) {
+      isPaused.current = true;
+    }
+  }, []);
 
   return (
     <section
@@ -1067,47 +1460,155 @@ function CourseRow({
       <AnimatePresence mode="wait">
         {!expanded ? (
           <motion.div
-            key="snap-scroll"
+            key={`snap-scroll-${isMobile ? "mobile" : "desktop"}`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <div
-              className="ec-pendulum-wrap"
-              style={{ overflow: "hidden", width: "100%", padding: "6px 0" }}
-              onMouseEnter={() => (isPaused.current = true)}
-              onMouseLeave={() => (isPaused.current = false)}
-            >
-              <div
-                ref={trackRef}
-                style={{
-                  display: "flex",
-                  gap: GAP,
-                  width: "max-content",
-                  willChange: "transform",
-                }}
-              >
-                {loopItems.map((course, i) => (
-                  <div
-                    key={`${course.id}-${i}`}
-                    className="ec-pendulum-card"
-                    ref={i === 0 ? cardRef : null}
+            {isMobile ? (
+              <div style={{ width: "100%", padding: "6px 0" }}>
+                <div
+                  style={{
+                    width: "100%",
+                    overflow: "hidden",
+                    position: "relative",
+                  }}
+                >
+                  <AnimatePresence mode="wait" initial={false}>
+                    <motion.div
+                      key={mobileIndex}
+                      initial={{
+                        x: slideDir === "left" ? "100%" : "-100%",
+                        opacity: 0,
+                      }}
+                      animate={{ x: 0, opacity: 1 }}
+                      exit={{
+                        x: slideDir === "left" ? "-100%" : "100%",
+                        opacity: 0,
+                      }}
+                      transition={{ duration: 0.35, ease: "easeInOut" }}
+                    >
+                      <CourseCard
+                        course={courses[mobileIndex]}
+                        index={0}
+                        isLight={isLight}
+                        textColor={textColor}
+                        subColor={subColor}
+                        themeAccentA={themeAccentA}
+                        borderColor={borderColor}
+                        onApply={onApply}
+                      />
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 16,
+                    marginTop: 16,
+                  }}
+                >
+                  <button
+                    onClick={() => {
+                      setSlideDir("right");
+                      setMobileIndex(
+                        (p) => (p - 1 + courses.length) % courses.length,
+                      );
+                    }}
+                    style={{
+                      width: 38,
+                      height: 38,
+                      borderRadius: "50%",
+                      border: `1.5px solid ${isLight ? "rgba(5,56,89,0.25)" : "rgba(255,255,255,0.2)"}`,
+                      background: "transparent",
+                      color: isLight ? "#053859" : "#f0f0f0",
+                      fontSize: 18,
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
                   >
-                    <CourseCard
-                      course={course}
-                      index={0}
-                      isLight={isLight}
-                      textColor={textColor}
-                      subColor={subColor}
-                      themeAccentA={themeAccentA}
-                      borderColor={borderColor}
-                      onApply={onApply}
-                    />
-                  </div>
-                ))}
+                    ‹
+                  </button>
+
+                  <span
+                    style={{
+                      fontSize: 12,
+                      color: isLight ? "#5a6170" : "#9ba3af",
+                    }}
+                  >
+                    {mobileIndex + 1} / {courses.length}
+                  </span>
+
+                  <button
+                    onClick={() => {
+                      setSlideDir("left");
+                      setMobileIndex((p) => (p + 1) % courses.length);
+                    }}
+                    style={{
+                      width: 38,
+                      height: 38,
+                      borderRadius: "50%",
+                      border: `1.5px solid ${isLight ? "rgba(5,56,89,0.25)" : "rgba(255,255,255,0.2)"}`,
+                      background: "transparent",
+                      color: isLight ? "#053859" : "#f0f0f0",
+                      fontSize: 18,
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    ›
+                  </button>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div
+                className="ec-pendulum-wrap"
+                style={{
+                  overflow: "hidden",
+                  width: "100%",
+                  padding: "6px 0",
+                  maxWidth: "100%",
+                }}
+                onMouseEnter={() => (isPaused.current = true)}
+                onMouseLeave={() => (isPaused.current = false)}
+              >
+                <div
+                  ref={trackRef}
+                  style={{
+                    display: "flex",
+                    gap: GAP,
+                    width: "max-content",
+                    willChange: "transform",
+                  }}
+                >
+                  {loopItems.map((course, i) => (
+                    <div
+                      key={`${course.id}-${i}`}
+                      className="ec-pendulum-card"
+                      ref={i === 0 ? cardRef : null}
+                    >
+                      <CourseCard
+                        course={course}
+                        index={0}
+                        isLight={isLight}
+                        textColor={textColor}
+                        subColor={subColor}
+                        themeAccentA={themeAccentA}
+                        borderColor={borderColor}
+                        onApply={onApply}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </motion.div>
         ) : (
           <motion.div
@@ -1138,7 +1639,6 @@ function CourseRow({
       <div className="ec-view-all-wrap">
         <button
           className="ec-view-all-btn"
-
           onClick={() => {
             const next = !expanded;
             setExpanded(next);
@@ -1378,21 +1878,7 @@ export default function OnlinePrograms() {
             </motion.div>
           ))}
         </motion.div>
-
-       
       </section>
-
-      <FilterSection
-        isLight={isLight}
-        textColor={textColor}
-        subColor={subColor}
-        themeAccentA={themeAccentA}
-        borderColor={borderColor}
-        onApply={(title) => {
-          setApplyFor(title);
-          setApplySubmitted(false);
-        }}
-      />
 
       <CourseRow
         title="Popular Courses"
@@ -1452,6 +1938,17 @@ export default function OnlinePrograms() {
         themeAccentA={themeAccentA}
         borderColor={borderColor}
         bg={isLight ? "#ffffff" : "#0a0a0a"}
+        onApply={(title) => {
+          setApplyFor(title);
+          setApplySubmitted(false);
+        }}
+      />
+      <FilterSection
+        isLight={isLight}
+        textColor={textColor}
+        subColor={subColor}
+        themeAccentA={themeAccentA}
+        borderColor={borderColor}
         onApply={(title) => {
           setApplyFor(title);
           setApplySubmitted(false);

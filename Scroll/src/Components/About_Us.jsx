@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { delay, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import Header from "./Header";
 import "./Home_Static.css";
 import sampleVideo from "../assets/BT_VIDEO.mp4";
@@ -312,8 +312,6 @@ function PhiloItem({ topic, index, total, pageRef, isDark }) {
     t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   const ep = ease(Math.min(prog * 1.5, 1));
 
-
-
   if (isMobile) {
     return (
       <div
@@ -344,7 +342,7 @@ function PhiloItem({ topic, index, total, pageRef, isDark }) {
             alt={topic.title}
             style={{
               width: "100%",
-              height: "140%", 
+              height: "140%",
               objectFit: "cover",
               display: "block",
               transform: `translateY(${(1 - ep) * -30}%)`,
@@ -590,7 +588,6 @@ function PhiloItem({ topic, index, total, pageRef, isDark }) {
   );
 }
 
-
 const STATS = [
   { end: 5, suffix: "k+", label: "Students Benefited" },
   { end: 2, suffix: "k+", label: "Full Stack Dev" },
@@ -619,7 +616,7 @@ function StatCard({ stat, index, accent, isDark }) {
           setTimeout(() => requestAnimationFrame(step), index * 150);
         }
       },
-      { threshold: 0.3 },
+      { threshold: 0.3, root: null },
     );
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
@@ -1395,7 +1392,6 @@ export default function About_Us() {
         </div>
         <div
           style={{
-            
             position: "relative",
             height:
               typeof window !== "undefined" && window.innerWidth <= 768

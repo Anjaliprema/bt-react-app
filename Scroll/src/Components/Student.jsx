@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FiArrowLeft } from "react-icons/fi";
+import { FiArrowLeft, FiChevronDown } from "react-icons/fi";
 import Header from "./Header";
 import Footer from "./Footer";
 import logo3 from "../assets/logo3.png";
@@ -15,7 +15,6 @@ import c6 from "../assets/c6.png";
 import f1 from "../assets/f1.png";
 import f2 from "../assets/f2.png";
 import "./Home_Static.css";
-
 function RoadmapCarousel({ cards, cExpand, cShrink }) {
   const trackRef = useRef(null);
   const containerRef = useRef(null);
@@ -24,8 +23,9 @@ function RoadmapCarousel({ cards, cExpand, cShrink }) {
 
   useEffect(() => {
     const updateVisible = () => {
-      if (window.innerWidth <= 540) setVisibleCount(1);
+      if (window.innerWidth <= 640) setVisibleCount(1);
       else if (window.innerWidth <= 900) setVisibleCount(2);
+      else if (window.innerWidth <= 1100) setVisibleCount(3);
       else setVisibleCount(4);
     };
     updateVisible();
@@ -35,6 +35,9 @@ function RoadmapCarousel({ cards, cExpand, cShrink }) {
 
   const maxIndex = Math.max(0, cards.length - visibleCount);
 
+  useEffect(() => {
+    setCurrent(0);
+  }, [visibleCount]);
   useEffect(() => {
     if (current > maxIndex) setCurrent(maxIndex);
   }, [maxIndex]);
@@ -62,6 +65,17 @@ function RoadmapCarousel({ cards, cExpand, cShrink }) {
     return () => window.removeEventListener("keydown", handleKey);
   }, [current, maxIndex]);
 
+  useEffect(() => {
+    if (visibleCount > 1) return;
+    const interval = setInterval(() => {
+      setCurrent((prev) => {
+        const next = prev + 1;
+        return next > maxIndex ? 0 : next;
+      });
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [visibleCount, maxIndex]);
+
   const linkedinIcon = (
     <svg style={{ width: 14, height: 14, fill: "#fff" }} viewBox="0 0 24 24">
       <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
@@ -74,9 +88,14 @@ function RoadmapCarousel({ cards, cExpand, cShrink }) {
         <div className="rm-carousel-viewport">
           <div className="rm-carousel-track" ref={trackRef}>
             {cards.map((card, i) => (
+            
               <div
                 key={i}
                 className="rm-card"
+                style={{
+                  minWidth: `calc(${100 / visibleCount}% - ${(18 * (visibleCount - 1)) / visibleCount}px)`,
+                  maxWidth: `calc(${100 / visibleCount}% - ${(18 * (visibleCount - 1)) / visibleCount}px)`,
+                }}
                 onClick={() => window.open(card.url, "_blank")}
                 onMouseEnter={cExpand}
                 onMouseLeave={cShrink}
@@ -113,19 +132,285 @@ function RoadmapCarousel({ cards, cExpand, cShrink }) {
         </div>
       </div>
 
-      <div className="rm-carousel-nav">
-        <div className="rm-dots">
-          {Array.from({ length: maxIndex + 1 }).map((_, i) => (
-            <div
-              key={i}
-              className={`rm-dot${current === i ? " on" : ""}`}
-              onClick={() => goTo(i)}
-              onMouseEnter={cExpand}
-              onMouseLeave={cShrink}
-            />
-          ))}
+      <div className="success-carousel-nav">
+        <button
+          className="success-nav-btn"
+          onClick={() => goTo(current - 1)}
+          onMouseEnter={cExpand}
+          onMouseLeave={cShrink}
+        >
+          ←
+        </button>
+        <button
+          className="success-nav-btn"
+          onClick={() => goTo(current + 1)}
+          onMouseEnter={cExpand}
+          onMouseLeave={cShrink}
+        >
+          →
+        </button>
+      </div>
+    </div>
+  );
+}
+const readTimeToProgress = (meta) => {
+  const match = meta.match(/(\d+)\s*min read/);
+  if (!match) return "0%";
+  const mins = parseInt(match[1]);
+  return `${Math.min(Math.round((mins / 15) * 100), 100)}%`;
+};
+
+
+function BlogCardCarousel({ cards, isLight, cExpand, cShrink, activeFilter }) {
+  const trackRef = useRef(null);
+  const [current, setCurrent] = useState(0);
+  const [visibleCount, setVisibleCount] = useState(3);
+  const prevCurrentRef = useRef(0);
+  const directionRef = useRef("next");
+
+  useEffect(() => {
+    const updateVisible = () => {
+      if (window.innerWidth <= 640) setVisibleCount(1);
+      else if (window.innerWidth <= 900) setVisibleCount(2);
+      else setVisibleCount(3);
+    };
+    updateVisible();
+    window.addEventListener("resize", updateVisible);
+    return () => window.removeEventListener("resize", updateVisible);
+  }, []);
+
+  const filteredCards =
+    activeFilter === "all"
+      ? cards
+      : cards.filter((c) => c.cat === activeFilter);
+
+  const maxIndex = Math.max(0, filteredCards.length - visibleCount);
+
+  useEffect(() => {
+    setCurrent(0);
+    prevCurrentRef.current = 0;
+  }, [activeFilter]);
+
+  useEffect(() => {
+    if (current > maxIndex) setCurrent(maxIndex);
+  }, [maxIndex]);
+
+  useEffect(() => {
+    if (visibleCount === 1) return;
+    if (!trackRef.current) return;
+    const cardEl = trackRef.current.querySelector(".blog-card-topic");
+    if (!cardEl) return;
+    const cardWidth = cardEl.offsetWidth + 28;
+    trackRef.current.style.transform = `translateX(-${current * cardWidth}px)`;
+  }, [current, visibleCount, filteredCards]);
+
+  useEffect(() => {
+    if (visibleCount > 1) return;
+    const interval = setInterval(() => {
+      setCurrent((prev) => {
+        directionRef.current = "next";
+        const next = prev + 1 > maxIndex ? 0 : prev + 1;
+        prevCurrentRef.current = prev;
+        return next;
+      });
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [visibleCount, maxIndex]);
+
+  const goTo = (i) => {
+    const next = Math.max(0, Math.min(i, maxIndex));
+    directionRef.current = next > current ? "next" : "prev";
+    prevCurrentRef.current = current;
+    setCurrent(next);
+  };
+
+  const handleCardMouseMove = (e) => {
+    const card = e.currentTarget;
+    const r = card.getBoundingClientRect();
+    const dx = ((e.clientX - (r.left + r.width / 2)) / (r.width / 2)) * 7;
+    const dy = ((e.clientY - (r.top + r.height / 2)) / (r.height / 2)) * 7;
+    card.style.transform = `perspective(900px) rotateY(${dx}deg) rotateX(${-dy}deg) translateY(-6px) scale(1.015)`;
+  };
+  const handleCardMouseLeave = (e) => {
+    e.currentTarget.style.transform = "";
+  };
+
+  if (visibleCount === 1) {
+    return (
+      <div>
+        <div
+          className="rm-carousel-outer"
+          style={{ position: "relative", minHeight: "360px" }}
+        >
+          {filteredCards.map((t, i) => {
+            const isActive = i === current;
+            const isPrev =
+              i === prevCurrentRef.current && i !== current;
+            let cls = "blog-mobile-card-hidden";
+            if (isActive) cls = "blog-mobile-card-active";
+            else if (isPrev) {
+              cls =
+                directionRef.current === "next"
+                  ? "blog-mobile-card-exit-left"
+                  : "blog-mobile-card-exit-right";
+            }
+            return (
+              <div
+                key={i}
+                className={`blog-card blog-card-topic blog-mobile-card ${cls}`}
+                style={{ width: "100%" }}
+                onClick={() => window.open(t.url, "_blank")}
+                onMouseEnter={cExpand}
+              >
+                <div
+                  className="blog-topic-img"
+                  style={{ background: isLight ? t.bg : t.darkBg }}
+                >
+                  <div
+                    className="blog-topic-img-inner"
+                    style={{
+                      color: isLight ? t.inner.color : t.inner.darkColor,
+                      fontFamily: t.inner.font,
+                      fontSize: t.inner.size,
+                      textAlign: "center",
+                      lineHeight: 1.15,
+                    }}
+                  >
+                    {t.inner.text}
+                  </div>
+                </div>
+                <div className="blog-topic-body">
+                  <span
+                    className={`blog-tag ${t.tag}`}
+                    style={{ marginBottom: ".5rem", width: "fit-content" }}
+                  >
+                    {t.tagLabel}
+                  </span>
+                  <div className="blog-topic-title">{t.title}</div>
+                  <div className="blog-topic-meta">{t.meta}</div>
+                  <div className="blog-progress-bar">
+                    <div
+                      className="blog-progress-fill"
+                      style={{
+                        background: t.progColor,
+                        width: readTimeToProgress(t.meta),
+                        transition: "width 1.4s cubic-bezier(0.4,0,0.2,1)",
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div className="success-carousel-nav" style={{ marginTop: "1.5rem" }}>
+          <button
+            className="success-nav-btn"
+            onClick={() => goTo(current - 1)}
+            onMouseEnter={cExpand}
+            onMouseLeave={cShrink}
+          >
+            ←
+          </button>
+          <button
+            className="success-nav-btn"
+            onClick={() => goTo(current + 1)}
+            onMouseEnter={cExpand}
+            onMouseLeave={cShrink}
+          >
+            →
+          </button>
         </div>
       </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="rm-carousel-outer">
+        <div className="rm-carousel-viewport">
+          <div
+            className="rm-carousel-track"
+            ref={trackRef}
+            style={{ gap: "28px" }}
+          >
+            {filteredCards.map((t, i) => (
+              <div
+                key={i}
+                className="blog-card blog-card-topic"
+                style={{
+                  minWidth: `calc(${100 / visibleCount}% - ${(28 * (visibleCount - 1)) / visibleCount}px)`,
+                  maxWidth: `calc(${100 / visibleCount}% - ${(28 * (visibleCount - 1)) / visibleCount}px)`,
+                }}
+                onMouseMove={handleCardMouseMove}
+                onMouseLeave={handleCardMouseLeave}
+                onMouseEnter={cExpand}
+                onClick={() => window.open(t.url, "_blank")}
+              >
+                <div
+                  className="blog-topic-img"
+                  style={{ background: isLight ? t.bg : t.darkBg }}
+                >
+                  <div
+                    className="blog-topic-img-inner"
+                    style={{
+                      color: isLight ? t.inner.color : t.inner.darkColor,
+                      fontFamily: t.inner.font,
+                      fontSize: t.inner.size,
+                      textAlign: "center",
+                      lineHeight: 1.15,
+                    }}
+                  >
+                    {t.inner.text}
+                  </div>
+                </div>
+                <div className="blog-topic-body">
+                  <span
+                    className={`blog-tag ${t.tag}`}
+                    style={{ marginBottom: ".5rem", width: "fit-content" }}
+                  >
+                    {t.tagLabel}
+                  </span>
+                  <div className="blog-topic-title">{t.title}</div>
+                  <div className="blog-topic-meta">{t.meta}</div>
+                  <div className="blog-progress-bar">
+                    <div
+                      className="blog-progress-fill"
+                      style={{
+                        background: t.progColor,
+                        width: readTimeToProgress(t.meta),
+                        transition: "width 1.4s cubic-bezier(0.4,0,0.2,1)",
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      {filteredCards.length > visibleCount && (
+        <div className="success-carousel-nav" style={{ marginTop: "1.5rem" }}>
+          <button
+            className="success-nav-btn"
+            onClick={() => goTo(current - 1)}
+            onMouseEnter={cExpand}
+            onMouseLeave={cShrink}
+            disabled={current === 0}
+          >
+            ←
+          </button>
+          <button
+            className="success-nav-btn"
+            onClick={() => goTo(current + 1)}
+            onMouseEnter={cExpand}
+            onMouseLeave={cShrink}
+            disabled={current >= maxIndex}
+          >
+            →
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -144,7 +429,7 @@ export default function Student() {
   const rafRef = useRef(null);
   const carouselTrackRef = useRef(null);
   const carouselCurrentRef = useRef(0);
-  const [activePreview, setActivePreview] = useState(null);
+  const [activePreview, setActivePreview] = useState(1);
 
   useEffect(() => {
     const h = () => setIsLight(localStorage.getItem("theme") !== "dark");
@@ -167,57 +452,142 @@ export default function Student() {
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
   }, []);
-
   useEffect(() => {
     const track = carouselTrackRef.current;
     if (!track) return;
 
     const originalCards = Array.from(track.children);
     const totalCards = originalCards.length;
-    const clonesBefore = originalCards
-      .slice(-2)
-      .map((card) => card.cloneNode(true));
-    const clonesAfter = originalCards
-      .slice(0, 2)
-      .map((card) => card.cloneNode(true));
-
+    const clonesBefore = originalCards.slice(-2).map((c) => c.cloneNode(true));
+    const clonesAfter = originalCards.slice(0, 2).map((c) => c.cloneNode(true));
     clonesBefore.forEach((clone) =>
       track.insertBefore(clone, track.firstChild),
     );
     clonesAfter.forEach((clone) => track.appendChild(clone));
-
     carouselCurrentRef.current = 2;
-
     const allCards = Array.from(track.children);
+
+    const isMobile = () => window.innerWidth <= 640;
 
     const updateCarousel = (instant = false) => {
       const current = carouselCurrentRef.current;
-      const cardWidth = 350;
-      const containerCenter = track.parentElement.offsetWidth / 2;
-      const offset = containerCenter - cardWidth / 2 - current * cardWidth;
+      if (isMobile()) {
+        track.style.transition = "none";
+        track.style.transform = "none";
+        allCards.forEach((card, i) => {
+          card.classList.remove(
+            "sc-active",
+            "sc-left-edge",
+            "sc-right-edge",
+            "sc-far-left",
+            "sc-far-right",
+            "sc-hidden",
+            "sc-enter-left",
+            "sc-enter-right",
+            "sc-exit-left",
+            "sc-exit-right",
+          );
+          if (i === current) card.classList.add("sc-active");
+          else card.classList.add("sc-hidden");
+        });
+      } else {
+        const cardWidth = 350;
+        const containerCenter = track.parentElement.offsetWidth / 2;
+        const offset = containerCenter - cardWidth / 2 - current * cardWidth;
+        track.style.transition = instant
+          ? "none"
+          : "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)";
+        track.style.transform = `translateX(${offset}px)`;
+        allCards.forEach((card, i) => {
+          card.classList.remove(
+            "sc-active",
+            "sc-left-edge",
+            "sc-right-edge",
+            "sc-far-left",
+            "sc-far-right",
+            "sc-hidden",
+            "sc-enter-left",
+            "sc-enter-right",
+            "sc-exit-left",
+            "sc-exit-right",
+          );
+          const pos = i - current;
+          if (pos === 0) card.classList.add("sc-active");
+          else if (pos === -1) card.classList.add("sc-left-edge");
+          else if (pos === -2) card.classList.add("sc-far-left");
+          else if (pos === 1) card.classList.add("sc-right-edge");
+          else if (pos === 2) card.classList.add("sc-far-right");
+          else card.classList.add("sc-hidden");
+        });
+      }
+    };
 
-      track.style.transition = instant
-        ? "none"
-        : "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)";
-      track.style.transform = `translateX(${offset}px)`;
+    const mobileTransition = (direction) => {
+      const current = carouselCurrentRef.current;
+      const prevActive = track.querySelector(".sc-active");
+      const nextCard = allCards[current];
+      if (!nextCard) return;
 
-      allCards.forEach((card, i) => {
-        card.classList.remove(
-          "sc-active",
-          "sc-left-edge",
-          "sc-right-edge",
-          "sc-far-left",
-          "sc-far-right",
-          "sc-hidden",
+      if (prevActive && prevActive !== nextCard) {
+        prevActive.classList.remove("sc-active");
+        prevActive.classList.add(
+          direction === "next" ? "sc-exit-left" : "sc-exit-right",
         );
-        const position = i - current;
-        if (position === 0) card.classList.add("sc-active");
-        else if (position === -1) card.classList.add("sc-left-edge");
-        else if (position === -2) card.classList.add("sc-far-left");
-        else if (position === 1) card.classList.add("sc-right-edge");
-        else if (position === 2) card.classList.add("sc-far-right");
-        else card.classList.add("sc-hidden");
+        setTimeout(() => {
+          prevActive.classList.remove(
+            "sc-exit-left",
+            "sc-exit-right",
+            "sc-hidden",
+          );
+          prevActive.classList.add("sc-hidden");
+        }, 420);
+      }
+
+      nextCard.classList.remove("sc-hidden", "sc-enter-left", "sc-enter-right");
+      nextCard.classList.add(
+        direction === "next" ? "sc-enter-right" : "sc-enter-left",
+      );
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          nextCard.classList.remove("sc-enter-right", "sc-enter-left");
+          nextCard.classList.add("sc-active");
+        });
       });
+    };
+
+    const prev = () => {
+      carouselCurrentRef.current--;
+      if (isMobile()) {
+        if (carouselCurrentRef.current < 2)
+          carouselCurrentRef.current = totalCards + 1;
+        mobileTransition("prev");
+      } else {
+        updateCarousel();
+        setTimeout(() => {
+          if (carouselCurrentRef.current < 2) {
+            carouselCurrentRef.current = totalCards + 1;
+            updateCarousel(true);
+          }
+        }, 600);
+      }
+    };
+
+    const next = () => {
+      carouselCurrentRef.current++;
+      if (isMobile()) {
+        if (carouselCurrentRef.current >= totalCards + 2)
+          carouselCurrentRef.current = 2;
+        mobileTransition("next");
+      } else {
+        updateCarousel();
+        setTimeout(() => {
+          if (carouselCurrentRef.current >= totalCards + 2) {
+            carouselCurrentRef.current = 2;
+            updateCarousel(true);
+          }
+        }, 600);
+      }
     };
 
     const handleTrackClick = (e) => {
@@ -226,28 +596,6 @@ export default function Student() {
       window.open(card.dataset.url, "_blank");
     };
     track.addEventListener("click", handleTrackClick);
-
-    const prev = () => {
-      carouselCurrentRef.current--;
-      updateCarousel();
-      setTimeout(() => {
-        if (carouselCurrentRef.current < 2) {
-          carouselCurrentRef.current = totalCards + 1;
-          updateCarousel(true);
-        }
-      }, 600);
-    };
-
-    const next = () => {
-      carouselCurrentRef.current++;
-      updateCarousel();
-      setTimeout(() => {
-        if (carouselCurrentRef.current >= totalCards + 2) {
-          carouselCurrentRef.current = 2;
-          updateCarousel(true);
-        }
-      }, 600);
-    };
 
     updateCarousel(true);
 
@@ -305,6 +653,34 @@ export default function Student() {
     return () => {
       document.removeEventListener("mousemove", onMove);
       cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    let interval = null;
+
+    const startOrStop = () => {
+      if (window.innerWidth <= 640) {
+        if (!interval) {
+          interval = setInterval(() => {
+            document.getElementById("successNext")?.click();
+          }, 3000);
+        }
+      } else {
+        if (interval) {
+          clearInterval(interval);
+          interval = null;
+        }
+      }
+    };
+
+    startOrStop(); 
+
+    window.addEventListener("resize", startOrStop);
+
+    return () => {
+      window.removeEventListener("resize", startOrStop);
+      if (interval) clearInterval(interval);
     };
   }, []);
 
@@ -523,7 +899,7 @@ export default function Student() {
       gradient: "linear-gradient(135deg, #060c3c, #5b21b6)",
       logo: logo3,
       badge: "MERN Stack",
-      lpa: "10",
+      lpa: "10 LPA",
       company: "Mr. Cooper + DTCC",
       college: "Sri Eshwar College of Engineering",
       avatars: [
@@ -537,7 +913,7 @@ export default function Student() {
       gradient: "linear-gradient(135deg, #2e0a34, #9320aa)",
       logo: logo5,
       badge: "Product",
-      lpa: "8",
+      lpa: "8 LPA",
       company: "DTCC",
       college: "KCG College of Technology",
       avatars: [
@@ -553,7 +929,7 @@ export default function Student() {
       gradient: "linear-gradient(135deg, #072c1c, #168957)",
       logo: logo2,
       badge: "MERN Stack",
-      lpa: "10",
+      lpa: "10 LPA",
       company: "Presidio",
       college: "Kongu Engineering College",
       avatars: [{ cls: "success-avatar-blue", letter: "K" }],
@@ -564,7 +940,7 @@ export default function Student() {
       gradient: "linear-gradient(135deg, #340823, #991b62)",
       logo: logo4,
       badge: "Product",
-      lpa: "8",
+      lpa: "8 LPA",
       company: "HP Inc",
       college: "M.Kumarasamy College of Engineering",
       avatars: [{ cls: "success-avatar-green", letter: "S" }],
@@ -575,7 +951,7 @@ export default function Student() {
       gradient: "linear-gradient(135deg, #072c1c, #168957)",
       logo: logo2,
       badge: "MERN Stack",
-      lpa: "8",
+      lpa: "8 LPA",
       company: "TrusTrace",
       college: "Kongu Engineering College",
       avatars: [{ cls: "success-avatar-orange", letter: "SK" }],
@@ -601,7 +977,6 @@ export default function Student() {
 
       <Header />
 
-      {/* ── Instant Feedback Section ── */}
       <div
         className="blog-page"
         style={{ marginTop: "2rem", marginBottom: "2rem" }}
@@ -613,16 +988,15 @@ export default function Student() {
             <h2
               style={{
                 fontFamily: "'Poppins', sans-serif",
-                fontSize: "clamp(28px, 3.8vw, 46px)",
+                fontSize: "clamp(28px, 3.8vw, 40px)",
                 fontWeight: 900,
                 lineHeight: 1.1,
-                letterSpacing: "-0.03em",
                 color: isLight ? "#0a0a0a" : "#f0f0f0",
                 margin: 0,
               }}
             >
               Instant Feedback{" "}
-              <span style={{ color: isLight ? "#053859" : "#f7c651" }}>
+              <span style={{ color: isLight ? "#074c7a" : "#f7c651" }}>
                 on Trainings
               </span>
             </h2>
@@ -646,10 +1020,10 @@ export default function Student() {
               href="https://thebettertomorrow.in/LRP"
               target="_blank"
               rel="noopener noreferrer"
-              className="feed-btn op-btn-primary btn-2"
+              className="feed-btn op-btn-primary"
               style={{
-                background: themeGradient,
-                color: isLight ? "#fff" : "#000",
+                background: isLight ? "#074c7a" : "#f7c651",
+                color: isLight ? "#ffffff" : "#000000",
               }}
               onMouseEnter={cExpand}
               onMouseLeave={cShrink}
@@ -659,7 +1033,7 @@ export default function Student() {
           </div>
 
           <div
-            className="feed-img-wrap"
+            className="tracker-img-wrap"
             style={{
               display: "flex",
               alignItems: "center",
@@ -699,7 +1073,7 @@ export default function Student() {
           <div className="tracker-content">
             <span className="tracker-badge">Coming Soon</span>
 
-            <h2 className="tracker-title">
+            <h2 className="success-main-title">
               Interview <span className="success-subtitle">Preparation</span>
               <br />
               Tracker
@@ -744,41 +1118,533 @@ export default function Student() {
 
       <div className="blog-page">
         <div className="blog-header blog-reveal">
-          <div>
-            <h1 className="blog-main-title">Blog</h1>
-          </div>
-          <div className="blog-header-right">
-            <div className="blog-post-count">total articles</div>
-            <div className="blog-big-num">128</div>
-          </div>
+          <h1 className="blog-main-title">Blog</h1>
         </div>
 
-        <div className="blog-ticker-wrap blog-reveal">
-          <div className="blog-ticker">
+        <div
+          className="blog-reveal"
+          style={{
+            width: "100%",
+            marginTop: "1.5rem",
+            borderRadius: "16px",
+            border: isLight
+              ? "1.5px solid rgba(5,56,89,0.15)"
+              : "1.5px solid rgba(255,255,255,0.12)",
+            overflow: "hidden",
+            background: "var(--card-bg)",
+          }}
+        >
+          <div
+            className="blog-trending-desktop"
+            style={{ display: "flex", gap: "0", minHeight: "340px" }}
+          >
+            <div
+              className="blog-reveal-left"
+              style={{
+                width: "33%",
+                borderRight: isLight
+                  ? "1px solid rgba(5,56,89,0.1)"
+                  : "1px solid rgba(255,255,255,0.1)",
+                padding: "1.4rem 1.6rem",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <div className="blog-trending-header">
+                <span className="blog-trending-title-text">Trending Now</span>
+                <span className="blog-trending-badge">HOT 🔥</span>
+              </div>
+              <div className="blog-trend-list">
+                {[
+                  {
+                    rank: 1,
+                    title: "MERN Stack Zero to Hero",
+                    views: "4.8k views · Web dev",
+                  },
+                  {
+                    rank: 2,
+                    title: "JS in 30 Days Challenge",
+                    views: "5.1k views · Web dev",
+                  },
+                  {
+                    rank: 3,
+                    title: "DSA Interview Roadmap",
+                    views: "3.2k views · Interview",
+                  },
+                  {
+                    rank: 4,
+                    title: "DevOps Beginner's Path",
+                    views: "2.9k views · DevOps",
+                  },
+                  {
+                    rank: 5,
+                    title: "Cracking Zoho Interviews",
+                    views: "1.7k views · Interview",
+                  },
+                ].map((t) => (
+                  <div
+                    key={t.rank}
+                    className="blog-trend-item"
+                    style={{
+                      background:
+                        activePreview === t.rank
+                          ? isLight
+                            ? "rgba(5,56,89,0.05)"
+                            : "rgba(247,198,81,0.08)"
+                          : "transparent",
+                      borderRadius: "8px",
+                      paddingLeft: activePreview === t.rank ? ".4rem" : "0",
+                    }}
+                    onClick={() =>
+                      setActivePreview(activePreview === t.rank ? null : t.rank)
+                    }
+                    onMouseEnter={cExpand}
+                    onMouseLeave={cShrink}
+                  >
+                    <div className="blog-trend-rank">{t.rank}</div>
+                    <div style={{ flex: 1 }}>
+                      <div className="blog-trend-text">{t.title}</div>
+                      <div className="blog-trend-views">{t.views}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div
+              className="blog-reveal-right"
+              style={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: activePreview ? "stretch" : "center",
+                justifyContent: activePreview ? "flex-start" : "center",
+                padding: "2rem",
+                color: "var(--text-muted)",
+                fontSize: 13,
+                textAlign: "center",
+              }}
+            >
+              {activePreview ? (
+                (() => {
+                  const p = trendPreviews[activePreview];
+                  return (
+                    <div
+                      key={activePreview}
+                      className="blog-preview-panel"
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "1rem",
+                        height: "100%",
+                      }}
+                    >
+                      <span
+                        className={`blog-tag ${p.tag.cls}`}
+                        style={{ width: "fit-content" }}
+                      >
+                        {p.tag.label}
+                      </span>
+                      <div
+                        style={{
+                          fontSize: "clamp(16px, 2vw, 21px)",
+                          fontWeight: 700,
+                          color: "var(--text-primary)",
+                          lineHeight: 1.3,
+                          textAlign: "left",
+                        }}
+                      >
+                        {p.title}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 13,
+                          color: "var(--text-secondary)",
+                          lineHeight: 1.7,
+                          textAlign: "left",
+                        }}
+                      >
+                        {p.snippet}
+                      </div>
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "1fr 1fr",
+                          gap: "8px",
+                        }}
+                      >
+                        {p.keyPoints.map((pt, i) => (
+                          <div
+                            key={i}
+                            style={{
+                              display: "flex",
+                              alignItems: "flex-start",
+                              gap: 7,
+                              fontSize: 12,
+                              color: "var(--text-secondary)",
+                              background: isLight
+                                ? "rgba(5,56,89,0.04)"
+                                : "rgba(255,255,255,0.04)",
+                              border: isLight
+                                ? "1px solid rgba(5,56,89,0.08)"
+                                : "1px solid rgba(255,255,255,0.08)",
+                              borderRadius: 8,
+                              padding: "7px 10px",
+                            }}
+                          >
+                            <span
+                              style={{
+                                color: "var(--accent)",
+                                fontWeight: 700,
+                                fontSize: 13,
+                                lineHeight: 1,
+                              }}
+                            >
+                              ✦
+                            </span>
+                            <span>{pt}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "1.5rem",
+                          padding: "0.8rem 0",
+                          borderTop: isLight
+                            ? "1px solid rgba(5,56,89,0.08)"
+                            : "1px solid rgba(255,255,255,0.08)",
+                          borderBottom: isLight
+                            ? "1px solid rgba(5,56,89,0.08)"
+                            : "1px solid rgba(255,255,255,0.08)",
+                        }}
+                      >
+                        {[
+                          { icon: "👁", val: p.stats.views, label: "views" },
+                          { icon: "⏱", val: p.stats.readTime, label: "read" },
+                          { icon: "★", val: p.stats.rating, label: "rating" },
+                        ].map((s, i) => (
+                          <div
+                            key={i}
+                            style={{
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: 2,
+                              textAlign: "left",
+                            }}
+                          >
+                            <span
+                              style={{
+                                fontSize: 12,
+                                fontWeight: 600,
+                                color: "var(--text-primary)",
+                              }}
+                            >
+                              {s.icon} {s.val}
+                            </span>
+                            <span
+                              style={{
+                                fontSize: 10,
+                                color: "var(--text-muted)",
+                                textTransform: "uppercase",
+                                letterSpacing: ".06em",
+                              }}
+                            >
+                              {s.label}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 10,
+                          }}
+                        >
+                          <div className="blog-avatar">{p.author.initials}</div>
+                          <div style={{ textAlign: "left" }}>
+                            <div
+                              style={{
+                                fontSize: 12,
+                                fontWeight: 600,
+                                color: "var(--text-primary)",
+                              }}
+                            >
+                              {p.author.name}
+                            </div>
+                            <div
+                              style={{
+                                fontSize: 11,
+                                color: "var(--text-muted)",
+                              }}
+                            >
+                              {p.author.role} · {p.author.date}
+                            </div>
+                          </div>
+                        </div>
+                        <button
+                          className="blog-read-btn"
+                          onClick={() =>
+                            window.open(trendLinks[activePreview], "_blank")
+                          }
+                          onMouseEnter={cExpand}
+                          onMouseLeave={cShrink}
+                        >
+                          Read article <span className="blog-btn-arrow">→</span>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })()
+              ) : (
+                <>
+                  <div style={{ fontSize: 28 }}>
+                    <FiArrowLeft />
+                  </div>
+                  <div
+                    style={{ fontWeight: 600, color: "var(--text-primary)" }}
+                  >
+                    Select a topic
+                  </div>
+                  <div>Click any trending item to preview</div>
+                </>
+              )}
+            </div>
+          </div>
+
+          <div className="blog-trending-mobile">
+            <div
+              style={{
+                padding: "1.2rem 1.2rem 0.8rem",
+                borderBottom: isLight
+                  ? "1px solid rgba(5,56,89,0.1)"
+                  : "1px solid rgba(255,255,255,0.1)",
+              }}
+            >
+              <div className="blog-trending-header">
+                <span className="blog-trending-title-text">Trending Now</span>
+                <span className="blog-trending-badge">HOT 🔥</span>
+              </div>
+            </div>
             {[
-              "MERN Stack · 4.8k views",
-              "DSA Roadmap · 3.2k views",
-              "DevOps Guide · 2.9k views",
-              "JS in 30 Days · 5.1k views",
-              "Zoho Interviews · 1.7k views",
-              "System Design · 2.4k views",
-              "MERN Stack · 4.8k views",
-              "DSA Roadmap · 3.2k views",
-              "DevOps Guide · 2.9k views",
-              "JS in 30 Days · 5.1k views",
-              "Zoho Interviews · 1.7k views",
-              "System Design · 2.4k views",
-            ].map((item, i) => {
-              const [title, views] = item.split(" · ");
+              {
+                rank: 1,
+                title: "MERN Stack Zero to Hero",
+                views: "4.8k views · Web dev",
+              },
+              {
+                rank: 2,
+                title: "JS in 30 Days Challenge",
+                views: "5.1k views · Web dev",
+              },
+              {
+                rank: 3,
+                title: "DSA Interview Roadmap",
+                views: "3.2k views · Interview",
+              },
+              {
+                rank: 4,
+                title: "DevOps Beginner's Path",
+                views: "2.9k views · DevOps",
+              },
+              {
+                rank: 5,
+                title: "Cracking Zoho Interviews",
+                views: "1.7k views · Interview",
+              },
+            ].map((t) => {
+              const isOpen = activePreview === t.rank;
+              const p = trendPreviews[t.rank];
               return (
-                <span key={i} className="blog-ticker-item">
-                  <strong>{title}</strong> · {views}{" "}
-                  <span className="blog-ticker-sep">✦</span>
-                </span>
+                <div
+                  key={t.rank}
+                  style={{
+                    borderBottom: isLight
+                      ? "1px solid rgba(5,56,89,0.08)"
+                      : "1px solid rgba(255,255,255,0.08)",
+                  }}
+                >
+                  <div
+                    onClick={() => setActivePreview(isOpen ? null : t.rank)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 14,
+                      padding: "1rem 1.2rem",
+                      cursor: "pointer",
+                      background: isOpen
+                        ? isLight
+                          ? "rgba(5,56,89,0.04)"
+                          : "rgba(247,198,81,0.06)"
+                        : "transparent",
+                      transition: "background 0.2s",
+                    }}
+                  >
+                    <div className="blog-trend-rank">{t.rank}</div>
+                    <div style={{ flex: 1 }}>
+                      <div className="blog-trend-text">{t.title}</div>
+                      <div className="blog-trend-views">{t.views}</div>
+                    </div>
+                    <FiChevronDown
+                      style={{
+                        fontSize: 16,
+                        color: isLight ? "#053859" : "#f7c651",
+                        transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+                        transition: "transform 0.25s ease",
+                        flexShrink: 0,
+                      }}
+                    />
+                  </div>
+
+                  {isOpen && (
+                    <div
+                      style={{
+                        padding: "1rem 1.2rem 1.4rem",
+                        background: isLight
+                          ? "rgba(5,56,89,0.02)"
+                          : "rgba(247,198,81,0.03)",
+                        borderTop: isLight
+                          ? "1px solid rgba(5,56,89,0.06)"
+                          : "1px solid rgba(255,255,255,0.06)",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "0.9rem",
+                      }}
+                    >
+                      <span
+                        className={`blog-tag ${p.tag.cls}`}
+                        style={{ width: "fit-content" }}
+                      >
+                        {p.tag.label}
+                      </span>
+                      <div
+                        style={{
+                          fontSize: 15,
+                          fontWeight: 700,
+                          color: "var(--text-primary)",
+                          lineHeight: 1.3,
+                        }}
+                      >
+                        {p.title}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 13,
+                          color: "var(--text-secondary)",
+                          lineHeight: 1.7,
+                        }}
+                      >
+                        {p.snippet}
+                      </div>
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "1rem",
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        {[
+                          { icon: "👁", val: p.stats.views, label: "views" },
+                          { icon: "⏱", val: p.stats.readTime, label: "read" },
+                          { icon: "★", val: p.stats.rating, label: "rating" },
+                        ].map((s, i) => (
+                          <div
+                            key={i}
+                            style={{
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: 2,
+                            }}
+                          >
+                            <span
+                              style={{
+                                fontSize: 12,
+                                fontWeight: 600,
+                                color: "var(--text-primary)",
+                              }}
+                            >
+                              {s.icon} {s.val}
+                            </span>
+                            <span
+                              style={{
+                                fontSize: 10,
+                                color: "var(--text-muted)",
+                                textTransform: "uppercase",
+                                letterSpacing: ".06em",
+                              }}
+                            >
+                              {s.label}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          marginTop: 4,
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                          }}
+                        >
+                          <div
+                            className="blog-avatar"
+                            style={{ width: 28, height: 28, fontSize: 11 }}
+                          >
+                            {p.author.initials}
+                          </div>
+                          <div>
+                            <div
+                              style={{
+                                fontSize: 12,
+                                fontWeight: 600,
+                                color: "var(--text-primary)",
+                              }}
+                            >
+                              {p.author.name}
+                            </div>
+                            <div
+                              style={{
+                                fontSize: 11,
+                                color: "var(--text-muted)",
+                              }}
+                            >
+                              {p.author.role}
+                            </div>
+                          </div>
+                        </div>
+                        <button
+                          className="blog-read-btn"
+                          style={{ fontSize: 11, padding: "6px 14px" }}
+                          onClick={() =>
+                            window.open(trendLinks[t.rank], "_blank")
+                          }
+                        >
+                          Read <span className="blog-btn-arrow">→</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               );
             })}
           </div>
         </div>
+     
 
         <div className="blog-filter-wrap blog-reveal blog-delay-1">
           {[
@@ -799,143 +1665,29 @@ export default function Student() {
           ))}
         </div>
 
-        <div className="blog-bento">
-          <div
-            className={cardCls("web", "blog-card-featured blog-reveal-left")}
-            style={{ gridColumn: "span 8" }}
-            {...cardEvt}
-            onClick={() =>
-              window.open(
-                "https://workat.tech/fullstack-development/article/fullstack-development-roadmap-mern-stack-8eqh1qepx6md",
-                "_blank",
-              )
-            }
-          >
-            <div className="blog-feat-img">
-              <div className="blog-code-grid-lines" />
-              <div className="blog-code-glow" />
-              <div className="blog-feat-img-inner">
-                <div className="blog-code-block">
-                  <div>
-                    <span style={{ color: "#f472b6" }}>const</span>{" "}
-                    <span style={{ color: "#60a5fa" }}>stack</span> = [
-                    <span style={{ color: "#fb923c" }}>'M'</span>,
-                    <span style={{ color: "#fb923c" }}>'E'</span>,
-                    <span style={{ color: "#fb923c" }}>'R'</span>,
-                    <span style={{ color: "#fb923c" }}>'N'</span>]
-                  </div>
-                  <div>
-                    <span style={{ color: "#4ade80" }}>stack.forEach</span>(s
-                    =&gt; <span style={{ color: "#e879f9" }}>learn</span>(s))
-                  </div>
-                  <div style={{ color: "#94a3b8" }}>
-                    // your roadmap starts here
-                  </div>
-                  <div>
-                    <span style={{ color: "#f472b6" }}>async function</span>{" "}
-                    <span style={{ color: "#60a5fa" }}>master</span>() &#123;
-                  </div>
-                  <div style={{ paddingLeft: "1em" }}>
-                    <span style={{ color: "#fb923c" }}>await</span>{" "}
-                    <span style={{ color: "#4ade80" }}>practice</span>(
-                    <span style={{ color: "#e879f9" }}>daily</span>)
-                  </div>
-                  <div>&#125;</div>
-                </div>
-              </div>
-              <div className="blog-img-corner-badge">MERN Stack</div>
-              <div className="blog-img-corner-views">4.8k views</div>
-              <div className="blog-img-corner-time">10 min read</div>
-            </div>
-
-            <div className="blog-feat-body">
-              <div className="blog-feat-title">
-                Roadmap for MERN Stack Developer — From Zero to Job Ready in
-                2024
-              </div>
-              <div className="blog-feat-excerpt">
-                A complete guide covering MongoDB, Express, React, and Node.js
-                with real-world projects, interview strategies, and salary
-                insights.
-              </div>
-              <div className="blog-feat-meta-row">
-                <div className="blog-avatar">BT</div>
-                <div className="blog-meta-info">
-                  <div className="blog-meta-name">Better Tomorrow</div>
-                  <div className="blog-meta-date">April 24, 2026</div>
-                </div>
-                <button
-                  className="blog-read-btn"
-                  onMouseEnter={cExpand}
-                  onMouseLeave={cShrink}
-                >
-                  Read article <span className="blog-btn-arrow">→</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div
-            className={cardCls("all", "blog-card-stats blog-reveal-right")}
-            {...cardEvt}
-          >
-            <div>
-              <div className="blog-stats-eyebrow">Blog · Statistics</div>
-              <div className="blog-stats-title">
-                Numbers that
-                <br />
-                tell our story
-              </div>
-            </div>
-            <div className="blog-stats-grid">
-              {[
-                { count: 128, label: "Articles", w: "85%" },
-                { count: 42, label: "Authors", w: "60%" },
-                { count: 94, label: "k Readers", w: "95%" },
-                { count: 4.9, label: "Avg. Rating", w: "98%" },
-              ].map((s, i) => (
-                <div key={i} className="blog-stat-item">
-                  <div className="blog-stat-num" data-blog-count={s.count}>
-                    0
-                  </div>
-                  <div className="blog-stat-label">{s.label}</div>
-                  <div className="blog-stat-bar">
-                    <div className="blog-stat-bar-fill" data-blog-statw={s.w} />
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="blog-stats-footer">
-              <span className="blog-stats-cta">Updated daily</span>
-              <div className="blog-stats-icon">✦</div>
-            </div>
-          </div>
-
-          {[
+        
+        <BlogCardCarousel
+          cards={[
             {
               cat: "web",
-              delay: "blog-delay-1",
               bg: "linear-gradient(135deg,#fef9c3,#fde68a)",
               darkBg: "linear-gradient(135deg,#2d2a00,#3d3500)",
               inner: {
                 text: "JS",
-                sub: "30 DAYS",
                 font: "'Poppins', sans-serif",
                 size: 36,
                 color: "#92400e",
                 darkColor: "#fde68a",
               },
-              tag: "blog-tag-primary",
+              tag: "blog-tag-js",
               tagLabel: "Web Development",
               title: "Complete Javascript in 30 Days",
               meta: "June 15, 2024 · 8 min read",
-              prog: "72%",
-              progColor: "#1a56db",
+              progColor: "#fde68a",
               url: "https://github.com/Asabeneh/30-Days-Of-JavaScript",
             },
             {
               cat: "interview",
-              delay: "blog-delay-2",
               bg: "linear-gradient(135deg,#f0fdf4,#bbf7d0)",
               darkBg: "linear-gradient(135deg,#002d1a,#003d22)",
               inner: {
@@ -949,13 +1701,11 @@ export default function Student() {
               tagLabel: "Interview Preparation",
               title: "Cracking Interviews at Zoho",
               meta: "May 18, 2024 · 7 min read",
-              prog: "58%",
               progColor: "#059669",
               url: "https://www.interviewbit.com/zoho-interview-questions/",
             },
             {
               cat: "interview",
-              delay: "blog-delay-3",
               bg: "linear-gradient(135deg,#ede9fe,#c4b5fd)",
               darkBg: "linear-gradient(135deg,#1e0a3c,#2d1260)",
               inner: {
@@ -969,471 +1719,69 @@ export default function Student() {
               tagLabel: "Interview Preparation",
               title: "How to Crack Product Based Companies",
               meta: "July 20, 2022 · 6 min read",
-              prog: "45%",
               progColor: "#7c3aed",
               url: "https://medium.com/@tushar_patil/a-guide-to-crack-product-based-companies-8a889e3ca7e7",
             },
-          ].map((t, i) => (
-            <div
-              key={i}
-              className={cardCls(
-                t.cat,
-                `blog-card-topic blog-reveal ${t.delay}`,
-              )}
-              {...cardEvt}
-              onClick={() => window.open(t.url, "_blank")}
-            >
-              <div
-                className="blog-topic-img"
-                style={{ background: isLight ? t.bg : t.darkBg }}
-              >
-                <div
-                  className="blog-topic-img-inner"
-                  style={{
-                    color: isLight ? t.inner.color : t.inner.darkColor,
-                    fontFamily: t.inner.font,
-                    fontSize: t.inner.size,
-                    textAlign: "center",
-                    lineHeight: 1.15,
-                  }}
-                >
-                  {t.inner.text.includes("\n")
-                    ? t.inner.text.split("\n").map((l, j) => (
-                        <span key={j} style={{ display: "block" }}>
-                          {l}
-                        </span>
-                      ))
-                    : t.inner.text}
-                </div>
-                {t.inner.sub && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      bottom: 8,
-                      right: 10,
-                      fontSize: 9,
-                      fontWeight: 700,
-                      color: isLight ? "#78350f" : "#fde68a",
-                      letterSpacing: ".1em",
-                      fontFamily: "'DM Mono',monospace",
-                    }}
-                  >
-                    {t.inner.sub}
-                  </div>
-                )}
-              </div>
-              <div className="blog-topic-body">
-                <span
-                  className={`blog-tag ${t.tag}`}
-                  style={{ marginBottom: ".5rem", width: "fit-content" }}
-                >
-                  {t.tagLabel}
-                </span>
-                <div className="blog-topic-title">{t.title}</div>
-                <div className="blog-topic-meta">{t.meta}</div>
-                <div className="blog-progress-bar">
-                  <div
-                    className="blog-progress-fill"
-                    data-blog-prog={t.prog}
-                    style={{ background: t.progColor }}
-                  />
-                </div>
-              </div>
-            </div>
-          ))}
-
-          {[
             {
               cat: "devops",
-              num: "01",
+              bg: "linear-gradient(135deg,#fce7f3,#fbcfe8)",
+              darkBg: "linear-gradient(135deg,#3b0a2a,#5c1040)",
+              inner: {
+                text: "DevOps",
+                font: "'Poppins', sans-serif",
+                size: 32,
+                color: "#831843",
+                darkColor: "#f9a8d4",
+              },
               tag: "blog-tag-pink",
               tagLabel: "DevOps",
               title: "Roadmap for DevOps — Beginners",
               meta: "September 7, 2024 · 10 min read",
-              fill: "80%",
-              barColor: "#c1121f",
-              views: "2.9k",
-              delay: "",
+              progColor: "#c1121f",
               url: "https://dev.to/prodevopsguytech/devops-for-beginners-a-complete-roadmap-to-get-started-2863",
             },
             {
               cat: "web",
-              num: "02",
+              bg: "linear-gradient(135deg,#e0f2fe,#bae6fd)",
+              darkBg: "linear-gradient(135deg,#001e3c,#002d5c)",
+              inner: {
+                text: "Web",
+                font: "'Poppins', sans-serif",
+                size: 36,
+                color: "#0c4a6e",
+                darkColor: "#7dd3fc",
+              },
               tag: "blog-tag-primary",
-              tagLabel: "Web Dev",
+              tagLabel: "Web Development",
               title: "Web Developer vs Web Designer",
               meta: "December 12, 2023 · 6 min read",
-              fill: "55%",
-              barColor: "#1a56db",
-              views: "1.8k",
-              delay: "blog-delay-1",
+              progColor: "#1a56db",
               url: "https://www.geeksforgeeks.org/blogs/difference-between-web-designer-and-web-developer/",
             },
             {
-              cat: "interview",
-              num: "03",
+              cat: "web",
+              bg: "linear-gradient(135deg,#fff7ed,#fed7aa)",
+              darkBg: "linear-gradient(135deg,#3d1a00,#5c2800)",
+              inner: {
+                text: "MERN",
+                font: "'Poppins', sans-serif",
+                size: 32,
+                color: "#9a3412",
+                darkColor: "#fdba74",
+              },
               tag: "blog-tag-amber",
-              tagLabel: "Interview",
+              tagLabel: "Web Development",
               title: "Roadmap for MERN Stack Developer",
               meta: "August 23, 2022 · 4 min read",
-              fill: "70%",
-              barColor: "#d97706",
-              views: "3.2k",
-              delay: "blog-delay-2",
+              progColor: "#d97706",
               url: "https://www.crio.do/blog/why-learn-data-structures-and-algorithms/",
             },
-          ].map((w, i) => (
-            <div
-              key={i}
-              className={cardCls(
-                w.cat,
-                `blog-card-wide blog-reveal ${w.delay}`,
-              )}
-              style={{ gridColumn: "span 12" }}
-              {...cardEvt}
-              onClick={() => window.open(w.url, "_blank")}
-            >
-              <div className="blog-wide-num">{w.num}</div>
-              <div className="blog-wide-pill">
-                <span className={`blog-tag ${w.tag}`}>{w.tagLabel}</span>
-              </div>
-              <div className="blog-wide-body">
-                <div className="blog-wide-title">{w.title}</div>
-                <div className="blog-wide-meta">{w.meta}</div>
-              </div>
-              <div className="blog-wide-bar">
-                <div
-                  className="blog-wide-bar-fill"
-                  data-blog-wfill={w.fill}
-                  style={{ background: w.barColor }}
-                />
-              </div>
-              <div className="blog-wide-views">{w.views}</div>
-              <div className="blog-wide-arrow">→</div>
-            </div>
-          ))}
-        </div>
-
-        <div
-          className="blog-reveal"
-          style={{
-            width: "100%",
-            marginTop: "1.5rem",
-            display: "flex",
-            gap: "0",
-            minHeight: "340px",
-            borderRadius: "16px",
-            border: isLight
-              ? "1.5px solid rgba(5,56,89,0.15)"
-              : "1.5px solid rgba(255,255,255,0.12)",
-            overflow: "hidden",
-            background: "var(--card-bg)",
-          }}
-        >
-          <div
-            className="blog-reveal-left"
-            style={{
-              width: "33%",
-              borderRight: isLight
-                ? "1px solid rgba(5,56,89,0.1)"
-                : "1px solid rgba(255,255,255,0.1)",
-              padding: "1.4rem 1.6rem",
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
-            <div className="blog-trending-header">
-              <span className="blog-trending-title-text">Trending Now</span>
-              <span className="blog-trending-badge">HOT 🔥</span>
-            </div>
-            <div className="blog-trend-list">
-              {[
-                {
-                  rank: 1,
-                  title: "MERN Stack Zero to Hero",
-                  views: "4.8k views · Web dev",
-                },
-                {
-                  rank: 2,
-                  title: "JS in 30 Days Challenge",
-                  views: "5.1k views · Web dev",
-                },
-                {
-                  rank: 3,
-                  title: "DSA Interview Roadmap",
-                  views: "3.2k views · Interview",
-                },
-                {
-                  rank: 4,
-                  title: "DevOps Beginner's Path",
-                  views: "2.9k views · DevOps",
-                },
-                {
-                  rank: 5,
-                  title: "Cracking Zoho Interviews",
-                  views: "1.7k views · Interview",
-                },
-              ].map((t) => (
-                <div
-                  key={t.rank}
-                  className="blog-trend-item"
-                  style={{
-                    background:
-                      activePreview === t.rank
-                        ? isLight
-                          ? "rgba(5,56,89,0.05)"
-                          : "rgba(247,198,81,0.08)"
-                        : "transparent",
-                    borderRadius: "8px",
-                    paddingLeft: activePreview === t.rank ? ".4rem" : "0",
-                  }}
-                  onClick={() =>
-                    setActivePreview(activePreview === t.rank ? null : t.rank)
-                  }
-                  onMouseEnter={cExpand}
-                  onMouseLeave={cShrink}
-                >
-                  <div className="blog-trend-rank">{t.rank}</div>
-                  <div style={{ flex: 1 }}>
-                    <div className="blog-trend-text">{t.title}</div>
-                    <div className="blog-trend-views">{t.views}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div
-            className="blog-reveal-right"
-            style={{
-              flex: 1,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: activePreview ? "stretch" : "center",
-              justifyContent: activePreview ? "flex-start" : "center",
-              padding: "2rem",
-              color: "var(--text-muted)",
-              fontSize: 13,
-              textAlign: "center",
-            }}
-          >
-            {activePreview ? (
-              (() => {
-                const p = trendPreviews[activePreview];
-                return (
-                  <div
-                    key={activePreview}
-                    className="blog-preview-panel"
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "1rem",
-                      height: "100%",
-                    }}
-                  >
-                    <span
-                      className={`blog-tag ${p.tag.cls}`}
-                      style={{ width: "fit-content" }}
-                    >
-                      {p.tag.label}
-                    </span>
-
-                    <div
-                      style={{
-                        fontSize: "clamp(16px, 2vw, 21px)",
-                        fontWeight: 700,
-                        color: "var(--text-primary)",
-                        lineHeight: 1.3,
-                        textAlign: "left",
-                      }}
-                    >
-                      {p.title}
-                    </div>
-
-                    <div
-                      style={{
-                        fontSize: 13,
-                        color: "var(--text-secondary)",
-                        lineHeight: 1.7,
-                        textAlign: "left",
-                      }}
-                    >
-                      {p.snippet}
-                    </div>
-
-                    <div
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "1fr 1fr",
-                        gap: "8px",
-                      }}
-                    >
-                      {p.keyPoints.map((pt, i) => (
-                        <div
-                          key={i}
-                          style={{
-                            display: "flex",
-                            alignItems: "flex-start",
-                            gap: 7,
-                            fontSize: 12,
-                            color: "var(--text-secondary)",
-                            background: isLight
-                              ? "rgba(5,56,89,0.04)"
-                              : "rgba(255,255,255,0.04)",
-                            border: isLight
-                              ? "1px solid rgba(5,56,89,0.08)"
-                              : "1px solid rgba(255,255,255,0.08)",
-                            borderRadius: 8,
-                            padding: "7px 10px",
-                          }}
-                        >
-                          <span
-                            style={{
-                              color: "var(--accent)",
-                              fontWeight: 700,
-                              fontSize: 13,
-                              lineHeight: 1,
-                            }}
-                          >
-                            ✦
-                          </span>
-                          <span>{pt}</span>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: "1.5rem",
-                        padding: "0.8rem 0",
-                        borderTop: isLight
-                          ? "1px solid rgba(5,56,89,0.08)"
-                          : "1px solid rgba(255,255,255,0.08)",
-                        borderBottom: isLight
-                          ? "1px solid rgba(5,56,89,0.08)"
-                          : "1px solid rgba(255,255,255,0.08)",
-                      }}
-                    >
-                      {[
-                        { icon: "👁", val: p.stats.views, label: "views" },
-                        { icon: "⏱", val: p.stats.readTime, label: "read" },
-                        { icon: "★", val: p.stats.rating, label: "rating" },
-                      ].map((s, i) => (
-                        <div
-                          key={i}
-                          style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: 2,
-                            textAlign: "left",
-                          }}
-                        >
-                          <span
-                            style={{
-                              fontSize: 12,
-                              fontWeight: 600,
-                              color: "var(--text-primary)",
-                            }}
-                          >
-                            {s.icon} {s.val}
-                          </span>
-                          <span
-                            style={{
-                              fontSize: 10,
-                              color: "var(--text-muted)",
-                              textTransform: "uppercase",
-                              letterSpacing: ".06em",
-                            }}
-                          >
-                            {s.label}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 10,
-                        }}
-                      >
-                        <div className="blog-avatar">{p.author.initials}</div>
-                        <div style={{ textAlign: "left" }}>
-                          <div
-                            style={{
-                              fontSize: 12,
-                              fontWeight: 600,
-                              color: "var(--text-primary)",
-                            }}
-                          >
-                            {p.author.name}
-                          </div>
-                          <div
-                            style={{ fontSize: 11, color: "var(--text-muted)" }}
-                          >
-                            {p.author.role} · {p.author.date}
-                          </div>
-                        </div>
-                      </div>
-                      <button
-                        className="blog-read-btn"
-                        onClick={() =>
-                          window.open(trendLinks[activePreview], "_blank")
-                        }
-                        onMouseEnter={cExpand}
-                        onMouseLeave={cShrink}
-                      >
-                        Read article <span className="blog-btn-arrow">→</span>
-                      </button>
-                    </div>
-                  </div>
-                );
-              })()
-            ) : (
-              <>
-                <div style={{ fontSize: 28 }}>
-                  <FiArrowLeft />
-                </div>
-                <div style={{ fontWeight: 600, color: "var(--text-primary)" }}>
-                  Select a topic
-                </div>
-                <div>Click any trending item to preview</div>
-              </>
-            )}
-          </div>
-        </div>
-
-        <div className="blog-dot-row">
-          {[0, 1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className={`blog-dot${activeDot === i ? " on" : ""}`}
-              onClick={() => setActiveDot(i)}
-              onMouseEnter={cExpand}
-              onMouseLeave={cShrink}
-            />
-          ))}
-        </div>
-
-        <div className="blog-footer-row blog-reveal">
-          <span className="blog-footer-label">Showing 10 of 128 articles</span>
-          <button
-            className="blog-va-btn"
-            onMouseEnter={cExpand}
-            onMouseLeave={cShrink}
-          >
-            View all articles ↗
-          </button>
-        </div>
+          ]}
+          isLight={isLight}
+          cExpand={cExpand}
+          cShrink={cShrink}
+          activeFilter={activeFilter}
+        />
       </div>
 
       <div className="blog-page">

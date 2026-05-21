@@ -31,12 +31,17 @@ export default function Footer() {
           <a href="#">Feedback</a>
         </div>
       </div>
-      <div className="footer-column newsletter" style={{ paddingBottom: "20px" }}>
+      <div
+        className="footer-column newsletter"
+        style={{ paddingBottom: "20px" }}
+      >
         <h4>JOIN OUR COMMUNITY</h4>
         <p>Will send you job updates and our community news</p>
-        <div className="newsletter-form">
+        <div className="newsletter-form" style={{ alignItems: "flex-start" }}>
           <input type="email" placeholder="Your email" />
-          <button className="btn-2">Subscribe</button>
+          <button className="btn-2" style={{ width: "auto", flexShrink: 0 }}>
+            Subscribe
+          </button>
         </div>
       </div>
       <div className="footer-bottom">

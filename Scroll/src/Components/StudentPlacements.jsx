@@ -1,6 +1,6 @@
 import "./StudentPlacements.css";
-import { useRef, useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { useRef, useState, useEffect, useCallback } from "react";
+
 const students = [
   {
     name: "Arun Kumar",
@@ -68,7 +68,18 @@ const students = [
   },
 ];
 
-function StudentPlacements() {
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 768);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)");
+    const handler = (e) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  return isMobile;
+}
+
+function DesktopPlacements() {
   const scrollRef = useRef(null);
   const rafRef = useRef(null);
   const pauseRef = useRef(false);
@@ -77,34 +88,28 @@ function StudentPlacements() {
   useEffect(() => {
     const container = scrollRef.current;
     const speed = 0.35;
-
     const loop = () => {
       if (!pauseRef.current) {
         container.scrollLeft += speed;
-
         if (container.scrollLeft >= container.scrollWidth / 2) {
           container.scrollLeft = 0;
         }
       }
       rafRef.current = requestAnimationFrame(loop);
     };
-
     rafRef.current = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(rafRef.current);
   }, []);
 
   useEffect(() => {
     const container = scrollRef.current;
-
     const onScroll = () => {
       const card = container.querySelector(".card");
       if (!card) return;
-
-      const cardWidth = card.offsetWidth + 20;
+      const cardWidth = card.offsetWidth + 18;
       const index = Math.round(container.scrollLeft / cardWidth);
       setActiveIndex(index % students.length);
     };
-
     container.addEventListener("scroll", onScroll);
     return () => container.removeEventListener("scroll", onScroll);
   }, []);
@@ -112,14 +117,11 @@ function StudentPlacements() {
   const scrollByCard = (dir) => {
     const card = scrollRef.current.querySelector(".card");
     if (!card) return;
-
     pauseRef.current = true;
-
     scrollRef.current.scrollBy({
-      left: dir * (card.offsetWidth + 20),
+      left: dir * (card.offsetWidth + 18),
       behavior: "smooth",
     });
-
     setTimeout(() => {
       pauseRef.current = false;
     }, 600);
@@ -128,12 +130,10 @@ function StudentPlacements() {
   const scrollToIndex = (index) => {
     const card = scrollRef.current.querySelector(".card");
     pauseRef.current = true;
-
     scrollRef.current.scrollTo({
-      left: index * (card.offsetWidth + 20),
+      left: index * (card.offsetWidth + 18),
       behavior: "smooth",
     });
-
     setTimeout(() => {
       pauseRef.current = false;
     }, 600);
@@ -152,36 +152,15 @@ function StudentPlacements() {
           onMouseEnter={() => (pauseRef.current = true)}
           onMouseLeave={() => (pauseRef.current = false)}
         >
-          <motion.div
-            className="scroll-track"
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{
-              duration: 0.6,
-              delay: 0.2,
-              ease: "easeOut",
-            }}
-          >
+          <div className="scroll-track scroll-track-fadein">
             {[...students, ...students].map((s, i) => (
-              <div
-                className={`card ${i % students.length === activeIndex ? "active-card" : ""}`}
+              <StudentCard
                 key={i}
-              >
-                <div className="image-container">
-                  <img src={s.img} className="student-image" alt={s.name} />
-                  <div className="package">{s.package}</div>
-                  <div className="student-name">{s.name}</div>
-                </div>
-                <hr />
-                <div className="belowimgcontent">
-                  <p className="cmp">{s.company}</p>
-                  <p className="rol">{s.role}</p>
-                  <p className="bat">Batch {s.batch}</p>
-                </div>
-              </div>
+                s={s}
+                isActive={i % students.length === activeIndex}
+              />
             ))}
-          </motion.div>
+          </div>
         </div>
 
         <span className="arrow" onClick={() => scrollByCard(1)}>
@@ -200,6 +179,90 @@ function StudentPlacements() {
       </div>
     </div>
   );
+}
+
+function MobilePlacements() {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [slideDir, setSlideDir] = useState("left");
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setSlideDir("left");
+      setActiveIndex((i) => (i + 1) % students.length);
+    }, 2500);
+    return () => clearInterval(id);
+  }, []);
+
+  const prev = useCallback(() => {
+    setSlideDir("right");
+    setActiveIndex((i) => (i - 1 + students.length) % students.length);
+  }, []);
+
+  const next = useCallback(() => {
+    setSlideDir("left");
+    setActiveIndex((i) => (i + 1) % students.length);
+  }, []);
+
+  const s = students[activeIndex];
+
+  return (
+    <div className="placements-section placements-mobile">
+      <div
+        key={activeIndex}
+        className={`mobile-card-wrapper mobile-card-slide mobile-card-slide-${slideDir}`}
+      >
+        <StudentCard s={s} isActive />
+      </div>
+
+      <div className="dots">
+        {students.map((_, i) => (
+          <span
+            key={i}
+            className={`dot ${i === activeIndex ? "active" : ""}`}
+            onClick={() => setActiveIndex(i)}
+          />
+        ))}
+      </div>
+
+      <div className="mobile-arrows">
+        <span className="arrow" onClick={prev}>
+          &#8249;
+        </span>
+        <span className="arrow" onClick={next}>
+          &#8250;
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function StudentCard({ s, isActive }) {
+  return (
+    <div className={`card${isActive ? " active-card" : ""}`}>
+      <div className="image-container">
+        <img
+          src={s.img}
+          className="student-image"
+          alt={s.name}
+          loading="eager"
+          decoding="async"
+        />
+        <div className="package">{s.package}</div>
+        <div className="student-name">{s.name}</div>
+      </div>
+      <hr />
+      <div className="belowimgcontent">
+        <p className="cmp">{s.company}</p>
+        <p className="rol">{s.role}</p>
+        <p className="bat">Batch {s.batch}</p>
+      </div>
+    </div>
+  );
+}
+
+function StudentPlacements() {
+  const isMobile = useIsMobile();
+  return isMobile ? <MobilePlacements /> : <DesktopPlacements />;
 }
 
 export default StudentPlacements;

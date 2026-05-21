@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import plimg5 from "../assets/plimg_tcs5.png";
 import plimg7 from "../assets/plimg_rently7.png";
-import plimg_infosys from "../assets/plimg_Infosys2.jpg"
+import plimg_infosys from "../assets/plimg_Infosys2.jpg";
 import { AnimatePresence, motion } from "framer-motion";
 const G = "https://www.google.com/s2/favicons?domain=";
 const SZ = "&sz=128";
@@ -231,6 +231,7 @@ function buildTicks() {
   return ticks;
 }
 const TICKS = buildTicks();
+
 function BgCanvas({ isLight }) {
   const canvasRef = useRef(null);
 
@@ -261,13 +262,13 @@ function BgCanvas({ isLight }) {
     const getWaveColor = (i, alpha) => {
       if (!isLight) {
         const c = [
-          `rgba(8, 28, 42, ${alpha})`, 
-          `rgba(12, 38, 55, ${alpha})`, 
-          `rgba(6, 22, 35, ${alpha})`, 
-          `rgba(18, 52, 72, ${alpha})`, 
-          `rgba(5, 18, 28, ${alpha})`, 
-          `rgba(14, 44, 62, ${alpha})`, 
-          `rgba(10, 32, 48, ${alpha})`, 
+          `rgba(8, 28, 42, ${alpha})`,
+          `rgba(12, 38, 55, ${alpha})`,
+          `rgba(6, 22, 35, ${alpha})`,
+          `rgba(18, 52, 72, ${alpha})`,
+          `rgba(5, 18, 28, ${alpha})`,
+          `rgba(14, 44, 62, ${alpha})`,
+          `rgba(10, 32, 48, ${alpha})`,
         ];
         return c[i % c.length];
       } else {
@@ -381,6 +382,7 @@ function BgCanvas({ isLight }) {
     />
   );
 }
+
 export default function CompanyOrbit({ isLight }) {
   const stageRef = useRef(null);
   const itemRefs = useRef([]);
@@ -391,14 +393,55 @@ export default function CompanyOrbit({ isLight }) {
   const lastVel = useRef(0);
   const rafRef = useRef(null);
   const hoveredRef = useRef(null);
+  const selectedIdxRef = useRef(null);
+  const isUserSelectedRef = useRef(false);
 
-  const [selected, setSelected] = useState(null);
+  const sectionRef = useRef(null);
+  const [inView, setInView] = useState(false);
+
+  const [winWidth, setWinWidth] = useState(
+    typeof window !== "undefined" ? window.innerWidth : 1200,
+  );
+  useEffect(() => {
+    const onResize = () => setWinWidth(window.innerWidth);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+  const isMobile = winWidth < 640;
+  const isTablet = winWidth >= 640 && winWidth < 1024;
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.3 },
+    );
+    if (sectionRef.current) observer.observe(sectionRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  const [selectedCompany, setSelectedCompany] = useState(null);
   const [hoveredIdx, setHoveredIdx] = useState(null);
+  const [autoIndex, setAutoIndex] = useState(0);
+  const [isUserSelected, setIsUserSelected] = useState(false);
+  const autoTimerRef = useRef(null);
+  const [showHint, setShowHint] = useState(true);
 
-  const LOGO_R = 111;
+  const selected = showHint
+    ? null
+    : isUserSelected
+      ? selectedCompany
+      : COMPANIES[autoIndex];
+
+  const stageSize = isMobile ? 290 : isTablet ? 300 : 340;
+  const STAGE_CENTER = stageSize / 2;
+  const LOGO_R = isMobile ? 95 : isTablet ? 99 : 111;
   const TILE = 38;
   const HALF = 19;
-  const STAGE_CENTER = 170;
 
   useEffect(() => {
     const loop = () => {
@@ -421,6 +464,21 @@ export default function CompanyOrbit({ isLight }) {
     rafRef.current = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(rafRef.current);
   }, []);
+
+  useEffect(() => {
+    if (!inView) return;
+    const t = setTimeout(() => setShowHint(false), 3000);
+    return () => clearTimeout(t);
+  }, [inView]);
+
+  useEffect(() => {
+    if (showHint) return;
+    clearInterval(autoTimerRef.current);
+    autoTimerRef.current = setInterval(() => {
+      setAutoIndex((prev) => (prev + 1) % N);
+    }, 3000);
+    return () => clearInterval(autoTimerRef.current);
+  }, [showHint]);
 
   function getAngle(e) {
     const rect = stageRef.current.getBoundingClientRect();
@@ -470,14 +528,58 @@ export default function CompanyOrbit({ isLight }) {
   const onLogoEnter = useCallback((i) => {
     hoveredRef.current = i;
     setHoveredIdx(i);
+    clearInterval(autoTimerRef.current);
   }, []);
+
   const onLogoLeave = useCallback(() => {
     hoveredRef.current = null;
     setHoveredIdx(null);
+    if (!isUserSelectedRef.current && !showHint) {
+      clearInterval(autoTimerRef.current);
+      autoTimerRef.current = setInterval(() => {
+        setAutoIndex((prev) => (prev + 1) % N);
+      }, 3000);
+    }
+  }, [showHint]);
+
+  const onLogoClick = useCallback((c, i) => {
+    setSelectedCompany((prev) => {
+      if (prev?.id === c.id) {
+        isUserSelectedRef.current = false;
+        setIsUserSelected(false);
+        const nextIdx = (selectedIdxRef.current + 1) % N;
+        setAutoIndex(nextIdx);
+        clearInterval(autoTimerRef.current);
+        autoTimerRef.current = setInterval(() => {
+          setAutoIndex((p) => (p + 1) % N);
+        }, 3000);
+        selectedIdxRef.current = null;
+        return null;
+      } else {
+        selectedIdxRef.current = i;
+        isUserSelectedRef.current = true;
+        setIsUserSelected(true);
+        clearInterval(autoTimerRef.current);
+        return c;
+      }
+    });
   }, []);
-  const onLogoClick = useCallback((c) => {
-    setSelected((prev) => (prev?.id === c.id ? null : c));
-  }, []);
+
+  const handleClose = () => {
+    const nextIdx =
+      (selectedIdxRef.current !== null
+        ? selectedIdxRef.current + 1
+        : autoIndex + 1) % N;
+    isUserSelectedRef.current = false;
+    setIsUserSelected(false);
+    setSelectedCompany(null);
+    setAutoIndex(nextIdx);
+    clearInterval(autoTimerRef.current);
+    autoTimerRef.current = setInterval(() => {
+      setAutoIndex((p) => (p + 1) % N);
+    }, 3000);
+    selectedIdxRef.current = null;
+  };
 
   const T = isLight
     ? {
@@ -509,18 +611,18 @@ export default function CompanyOrbit({ isLight }) {
     : {
         sectA: "#1e4fa0",
         sectB: "#0e2c6e",
-        sectText: "rgba(180, 210, 255, 0.85)", 
-        rimOuter: "#5b9bd5", 
+        sectText: "rgba(180, 210, 255, 0.85)",
+        rimOuter: "#5b9bd5",
         rimMid: "#3a7abf",
-        rimInner: "#2a6aaf", 
-        bandStroke: "#3a7abf", 
-        tickCol: "#5b9bd5", 
-        hubBorder: "rgba(91, 155, 213, 0.25)", 
-        hubTitle: "#5b9bd5", 
-        hubSub: "rgba(91, 155, 213, 0.45)", 
-        panelBorder: "rgba(91, 155, 213, 0.20)", 
-        panelTag: "rgba(91, 155, 213, 0.07)", 
-        logoHover: "0 6px 28px rgba(91, 155, 213, 0.30)", 
+        rimInner: "#2a6aaf",
+        bandStroke: "#3a7abf",
+        tickCol: "#5b9bd5",
+        hubBorder: "rgba(91, 155, 213, 0.25)",
+        hubTitle: "#5b9bd5",
+        hubSub: "rgba(91, 155, 213, 0.45)",
+        panelBorder: "rgba(91, 155, 213, 0.20)",
+        panelTag: "rgba(91, 155, 213, 0.07)",
+        logoHover: "0 6px 28px rgba(91, 155, 213, 0.30)",
         panelBg: "#0e2659",
         panelText: "#f0e8d0",
         panelSub: "rgba(240,220,180,0.58)",
@@ -535,9 +637,14 @@ export default function CompanyOrbit({ isLight }) {
 
   return (
     <div
+      ref={sectionRef}
       style={{
         background: T.sectionBg,
-        padding: "56px 20px 80px",
+        padding: isMobile
+          ? "36px 0 60px"
+          : isTablet
+            ? "48px 20px 70px"
+            : "56px 20px 80px",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -552,7 +659,7 @@ export default function CompanyOrbit({ isLight }) {
         initial={{ opacity: 0, y: -30 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.5 }}
-        transition={{ duration: 0.7, delay: 0.50, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: 0.7, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
         style={{
           textAlign: "center",
           marginBottom: 40,
@@ -563,9 +670,8 @@ export default function CompanyOrbit({ isLight }) {
         <h2
           style={{
             fontFamily: "Poppins,sans-serif",
-            fontSize: "clamp(22px,4vw,34px)",
+            fontSize: "clamp(22px,4vw,30px)",
             fontWeight: 900,
-            letterSpacing: "-0.03em",
             lineHeight: 1.2,
             color: isLight ? "#ffffff" : "white",
             margin: "0 0 10px",
@@ -581,13 +687,15 @@ export default function CompanyOrbit({ isLight }) {
       <div
         style={{
           display: "flex",
+          flexDirection: isMobile ? "column" : "row",
           alignItems: "center",
           justifyContent: "center",
-          gap: 36,
+          gap: isMobile ? 48 : isTablet ? 24 : 36,
           width: "100%",
-          maxWidth: 900,
+          maxWidth: isMobile ? "100%" : isTablet ? 780 : 900,
           position: "relative",
           zIndex: 1,
+          padding: isMobile ? "0 16px" : "0",
         }}
       >
         <div style={{ position: "relative", flexShrink: 0 }}>
@@ -603,8 +711,8 @@ export default function CompanyOrbit({ isLight }) {
               onTouchStart={onDown}
               style={{
                 position: "relative",
-                width: 340,
-                height: 340,
+                width: isMobile ? 290 : isTablet ? 300 : 340,
+                height: isMobile ? 290 : isTablet ? 300 : 340,
                 cursor: "grab",
                 userSelect: "none",
                 touchAction: "none",
@@ -630,21 +738,21 @@ export default function CompanyOrbit({ isLight }) {
                     <stop
                       offset="0%"
                       stopColor={isLight ? "#d8e8f8" : "#1a4a7a"}
-                    />{" "}
+                    />
                     <stop
                       offset="100%"
                       stopColor={isLight ? "#c0d4ec" : "#0f3060"}
-                    />{" "}
+                    />
                   </radialGradient>
                   <radialGradient id="hubGrad" cx="40%" cy="38%" r="62%">
                     <stop
                       offset="0%"
                       stopColor={isLight ? "#ffffff" : "#1a3a5c"}
-                    />{" "}
+                    />
                     <stop
                       offset="100%"
                       stopColor={isLight ? "#e8f0fa" : "#0e2440"}
-                    />{" "}
+                    />
                   </radialGradient>
                   <filter id="rimGlow">
                     <feGaussianBlur stdDeviation="1.8" result="blur" />
@@ -822,14 +930,18 @@ export default function CompanyOrbit({ isLight }) {
 
               {COMPANIES.map((c, i) => {
                 const isHov = hoveredIdx === i;
-                const isSel = selected?.id === c.id;
+                const isSel =
+                  !showHint &&
+                  (isUserSelected
+                    ? selectedCompany?.id === c.id
+                    : autoIndex === i);
                 return (
                   <div
                     key={c.id}
                     ref={(el) => (itemRefs.current[i] = el)}
                     onMouseEnter={() => onLogoEnter(i)}
                     onMouseLeave={onLogoLeave}
-                    onClick={() => onLogoClick(c)}
+                    onClick={() => onLogoClick(c, i)}
                     style={{
                       position: "absolute",
                       left: STAGE_CENTER,
@@ -931,7 +1043,6 @@ export default function CompanyOrbit({ isLight }) {
             </div>
           </motion.div>
 
-          
           <div
             style={{
               position: "absolute",
@@ -976,227 +1087,242 @@ export default function CompanyOrbit({ isLight }) {
           />
         </div>
 
-        <AnimatePresence mode="wait">
-          {selected ? (
-            <motion.div
-              key={selected.id} 
-              initial={{ opacity: 0, x: 40 }}
-              animate={{ opacity: 1, x: 0 }} 
-              exit={{ opacity: 0, x: 40 }}
-              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              style={{
-                width: 280,
-                flexShrink: 0,
-                background: T.panelBg,
-                border: `1px solid ${T.panelBorder}`,
-                borderRadius: 20,
-                padding: "22px 20px",
-                boxShadow: `0 22px 68px ${T.shadow}`,
-                position: "relative",
-                transition: "background 0.4s, border-color 0.4s",
-              }}
-            >
-              <button
-                onClick={() => setSelected(null)}
+        {inView && (
+          <AnimatePresence mode="wait">
+            {selected ? (
+              <motion.div
+                key={selected.id}
+                initial={{
+                  opacity: 0,
+                  x: isMobile ? 0 : 60,
+                  y: isMobile ? 30 : 0,
+                  scale: 0.96,
+                }}
+                animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
+                exit={{
+                  opacity: 0,
+                  x: isMobile ? 0 : -60,
+                  y: isMobile ? -20 : 0,
+                  scale: 0.96,
+                }}
+                transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
                 style={{
-                  position: "absolute",
-                  top: 12,
-                  right: 12,
-                  width: 26,
-                  height: 26,
-                  borderRadius: "50%",
+                  width: isMobile ? 290 : isTablet ? 260 : 280,
+                  maxWidth: isMobile ? 290 : "none",
+                  flexShrink: 0,
+                  background: T.panelBg,
                   border: `1px solid ${T.panelBorder}`,
-                  background: "transparent",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: T.panelSub,
-                  fontSize: 13,
+                  borderRadius: 20,
+                  padding: "22px 20px",
+                  boxShadow: `0 22px 68px ${T.shadow}`,
+                  position: "relative",
+                  transition: "background 0.4s, border-color 0.4s",
+                  alignSelf: isMobile ? "center" : "auto",
                 }}
               >
-                ✕
-              </button>
-
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 12,
-                  marginBottom: 16,
-                }}
-              >
-                <div
+                <button
+                  onClick={handleClose}
                   style={{
-                    width: 52,
-                    height: 52,
-                    borderRadius: 14,
-                    flexShrink: 0,
-                    background: "#ffffff",
-                    border: `1.5px solid ${T.panelBorder}`,
-                    boxShadow: T.logoShadow,
+                    position: "absolute",
+                    top: 12,
+                    right: 12,
+                    width: 26,
+                    height: 26,
+                    borderRadius: "50%",
+                    border: `1px solid ${T.panelBorder}`,
+                    background: "transparent",
+                    cursor: "pointer",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    overflow: "hidden",
+                    color: T.panelSub,
+                    fontSize: 13,
                   }}
                 >
-                  <img
-                    src={selected.logo}
-                    alt={selected.name}
-                    style={{ width: 36, height: 36, objectFit: "contain" }}
-                    onError={(e) => {
-                      e.target.style.display = "none";
+                  ✕
+                </button>
+
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12,
+                    marginBottom: 16,
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 52,
+                      height: 52,
+                      borderRadius: 14,
+                      flexShrink: 0,
+                      background: "#ffffff",
+                      border: `1.5px solid ${T.panelBorder}`,
+                      boxShadow: T.logoShadow,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      overflow: "hidden",
                     }}
-                  />
+                  >
+                    <img
+                      src={selected.logo}
+                      alt={selected.name}
+                      style={{ width: 36, height: 36, objectFit: "contain" }}
+                      onError={(e) => {
+                        e.target.style.display = "none";
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <h3
+                      style={{
+                        margin: 0,
+                        fontFamily: "Poppins,sans-serif",
+                        fontSize: 15,
+                        fontWeight: 800,
+                        color: T.panelText,
+                        letterSpacing: "-0.02em",
+                      }}
+                    >
+                      {selected.name}
+                    </h3>
+                    <span
+                      style={{
+                        fontFamily: "Poppins,sans-serif",
+                        fontSize: 10,
+                        fontWeight: 700,
+                        color: isLight ? "#1a4a9e" : "#f7c651",
+                        letterSpacing: "0.05em",
+                      }}
+                    >
+                      {selected.role}
+                    </span>
+                  </div>
                 </div>
-                <div>
-                  <h3
+
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: 8,
+                    marginBottom: 12,
+                  }}
+                >
+                  {[
+                    { label: "Students Placed", value: `${selected.placed}+` },
+                    { label: "Highest Package", value: selected.package },
+                  ].map((s) => (
+                    <div
+                      key={s.label}
+                      style={{
+                        background: T.panelTag,
+                        borderRadius: 10,
+                        padding: "10px 12px",
+                        border: `1px solid ${T.panelBorder}`,
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontFamily: "Poppins,sans-serif",
+                          fontSize: 18,
+                          fontWeight: 900,
+                          color: isLight ? "#1a4a9e" : "#f7c651",
+                          lineHeight: 1,
+                        }}
+                      >
+                        {s.value}
+                      </div>
+                      <div
+                        style={{
+                          fontFamily: "Poppins,sans-serif",
+                          fontSize: 9,
+                          color: T.panelSub,
+                          marginTop: 3,
+                          fontWeight: 600,
+                        }}
+                      >
+                        {s.label}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div
+                  style={{
+                    background: T.panelTag,
+                    borderRadius: 10,
+                    padding: "11px 12px",
+                    marginBottom: 12,
+                    border: `1px solid ${T.panelBorder}`,
+                  }}
+                >
+                  <p
                     style={{
                       margin: 0,
                       fontFamily: "Poppins,sans-serif",
-                      fontSize: 15,
-                      fontWeight: 800,
-                      color: T.panelText,
-                      letterSpacing: "-0.02em",
+                      fontSize: 11,
+                      lineHeight: 1.75,
+                      color: T.panelSub,
                     }}
                   >
-                    {selected.name}
-                  </h3>
-                  <span
-                    style={{
-                      fontFamily: "Poppins,sans-serif",
-                      fontSize: 10,
-                      fontWeight: 700,
-                      color: isLight ? "#1a4a9e" : "#f7c651",
-                      letterSpacing: "0.05em",
-                    }}
-                  >
-                    {selected.role}
-                  </span>
+                    {selected.achievement}
+                  </p>
                 </div>
-              </div>
-
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: 8,
-                  marginBottom: 12,
+              </motion.div>
+            ) : (
+              <motion.div
+                key="hint"
+                initial={{
+                  opacity: 0,
+                  x: isMobile ? 0 : 40,
+                  y: isMobile ? 20 : 0,
                 }}
-              >
-                {[
-                  { label: "Students Placed", value: `${selected.placed}+` },
-                  { label: "Highest Package", value: selected.package },
-                ].map((s) => (
-                  <div
-                    key={s.label}
-                    style={{
-                      background: T.panelTag,
-                      borderRadius: 10,
-                      padding: "10px 12px",
-                      border: `1px solid ${T.panelBorder}`,
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontFamily: "Poppins,sans-serif",
-                        fontSize: 18,
-                        fontWeight: 900,
-                        color: isLight ? "#1a4a9e" : "#f7c651",
-                        lineHeight: 1,
-                      }}
-                    >
-                      {s.value}
-                    </div>
-                    <div
-                      style={{
-                        fontFamily: "Poppins,sans-serif",
-                        fontSize: 9,
-                        color: T.panelSub,
-                        marginTop: 3,
-                        fontWeight: 600,
-                      }}
-                    >
-                      {s.label}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div
+                whileInView={{ opacity: 1, x: 0, y: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                exit={{ opacity: 0, x: isMobile ? 0 : 20 }}
+                transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
                 style={{
-                  background: T.panelTag,
-                  borderRadius: 10,
-                  padding: "11px 12px",
-                  marginBottom: 12,
-                  border: `1px solid ${T.panelBorder}`,
+                  width: isMobile ? 290 : isTablet ? 240 : 260,
+                  maxWidth: isMobile ? 290 : "none",
+                  flexShrink: 0,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 12,
+                  padding: isMobile ? "20px 24px" : "32px 24px",
+                  borderRadius: 20,
+                  border: `1px dashed ${isLight ? "rgba(255,255,255,0.30)" : "rgba(91,155,213,0.35)"}`,
+                  background: isLight
+                    ? "rgba(255,255,255,0.08)"
+                    : "rgba(91,155,213,0.03)",
+                  backdropFilter: "blur(4px)",
+                  transition: "all 0.4s",
+                  alignSelf: isMobile ? "center" : "auto",
                 }}
               >
                 <p
                   style={{
                     margin: 0,
                     fontFamily: "Poppins,sans-serif",
-                    fontSize: 11,
-                    lineHeight: 1.75,
-                    color: T.panelSub,
+                    fontSize: 12,
+                    fontWeight: 600,
+                    textAlign: "center",
+                    lineHeight: 1.6,
+                    color: isLight
+                      ? "rgba(255,255,255,0.70)"
+                      : "rgba(91,155,213,0.50)",
                   }}
                 >
-                  {selected.achievement}
+                  Hover a logo to pause
+                  <br />
+                  Click to see placement details
                 </p>
-              </div>
-
-            
-            </motion.div>
-          ) : (
-            <motion.div
-              key="hint"
-              initial={{ opacity: 0, x: 40 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              exit={{ opacity: 0, x: 20 }}
-              transition={{
-                duration: 0.2,
-                ease: [0.16, 1, 0.3, 1],
-              }}
-              style={{
-                width: 260,
-                flexShrink: 0,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 12,
-                padding: "32px 24px",
-                borderRadius: 20,
-                border: `1px dashed ${isLight ? "rgba(255,255,255,0.30)" : "rgba(91,155,213,0.35)"}`,
-                background: isLight
-                  ? "rgba(255,255,255,0.08)"
-                  : "rgba(91,155,213,0.03)",
-                backdropFilter: "blur(4px)",
-                transition: "all 0.4s",
-              }}
-            >
-              <p
-                style={{
-                  margin: 0,
-                  fontFamily: "Poppins,sans-serif",
-                  fontSize: 12,
-                  fontWeight: 600,
-                  textAlign: "center",
-                  lineHeight: 1.6,
-                  color: isLight
-                    ? "rgba(255,255,255,0.70)"
-                    : "rgba(91,155,213,0.50)",
-                }}
-              >
-                Hover a logo to pause
-                <br />
-                Click to see placement details
-              </p>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        )}
       </div>
     </div>
   );

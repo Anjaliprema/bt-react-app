@@ -1205,13 +1205,11 @@ export default function ContactUs() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
           >
-            
-
             <a
               href="https://mail.google.com/mail/?view=cm&fs=1&to=training@thebettertomorrow.in&su=New%20Course%20Enquiry%20-%20The%20Better%20Tomorrow&body=Hi%20Team%2C%0A%0A%2F%2F%2F%20Type%20your%20message%20here%0A/// Kindly%20mention%20your%20name%2C%20phone%20number%2C%20and%20the%20course%20you%27re%20interested%20in%20so%20we%20can%20get%20back%20to%20you%20quickly."
               rel="noopener noreferrer"
               target="_blank"
-              style={{ textDecoration: "none" }}
+              style={{ textDecoration: "none", display: "inline-flex" }}
             >
               <button
                 className="btn-2"
@@ -1220,11 +1218,12 @@ export default function ContactUs() {
                   color: isLight ? "#fff" : "#000",
                   border: "none",
                   cursor: "pointer",
-                  padding: "10px 16px",
+                  padding: "10px 24px",
                   borderRadius: "30px",
                   fontSize: "14px",
                   fontWeight: 600,
                   outline: "none",
+                  width: "auto",
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = "translateY(-2px)";
@@ -1251,6 +1250,12 @@ export default function ContactUs() {
                 color: textColor,
                 border: `1px solid ${borderColor}`,
                 cursor: "pointer",
+                padding: "10px 24px",
+                borderRadius: "30px",
+                fontSize: "14px",
+                fontWeight: 600,
+                minWidth: "unset",
+                width: "auto",
               }}
             >
               Talk to Us
@@ -1266,7 +1271,7 @@ export default function ContactUs() {
           position: "relative",
           overflow: "hidden",
           boxSizing: "border-box",
-          padding: "30px clamp(16px,5vw,80px) 80px",
+          padding: "30px clamp(16px,5vw,80px) 40px",
         }}
       >
         <div
@@ -1491,14 +1496,7 @@ export default function ContactUs() {
             </div>
           </div>
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 0.9fr",
-              gap: 20,
-              alignItems: "stretch",
-            }}
-          >
+          <div className="contact-layout-grid">
             <div
               style={{
                 display: "flex",
